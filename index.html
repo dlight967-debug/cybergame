@@ -1,0 +1,3904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CYBER-SLASH: NEO-STREETS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0e1116;
+      color: #f1f5f9;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    #gameContainer {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0e1116;
+    }
+    canvas#gameCanvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: crosshair;
+    }
+    .tactical-panel {
+      background: #141a22;
+      border: 1px solid #2b3544;
+      border-radius: 6px;
+    }
+    .tactical-btn {
+      background: #141a22;
+      border: 1px solid #2b3544;
+      color: #e2e8f0;
+      border-radius: 5px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+    }
+    .tactical-btn:hover {
+      background: #1c2430;
+      border-color: #475569;
+      color: #ffffff;
+    }
+    .tactical-btn:active {
+      transform: translateY(1px);
+    }
+    .deploy-btn {
+      background: #1d4ed8;
+      border: 1px solid #60a5fa;
+      color: #ffffff;
+      border-radius: 6px;
+      transition: background 0.12s ease, transform 0.08s ease;
+    }
+    .deploy-btn:hover {
+      background: #2563eb;
+    }
+    .deploy-btn:active {
+      transform: translateY(1px);
+    }
+    /* Explicit Brown Weapon Arrow Styling */
+    .brown-arrow-btn {
+      background: #6e4423;
+      border: 1px solid #b57945;
+      color: #fef3c7;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.12s ease, transform 0.08s ease;
+    }
+    .brown-arrow-btn:hover {
+      background: #8a562d;
+      border-color: #d99b66;
+    }
+    .brown-arrow-btn:active {
+      transform: translateY(1px);
+    }
+    .weapon-card-active {
+      background: rgba(110, 68, 35, 0.34) !important;
+      border: 1px solid #b57945 !important;
+    }
+    .card-active {
+      background: #1c2636 !important;
+      border: 1px solid #38bdf8 !important;
+    }
+    .retro-menu-item {
+      border-left: 3px solid transparent;
+      transition: all 0.1s ease;
+    }
+    .retro-menu-item.selected {
+      background: rgba(20, 26, 34, 0.94);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      padding-left: 18px;
+    }
+    kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #f8fafc;
+      background: #0e1116;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  </style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Chakra+Petch:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Chakra Petch',Arial,sans-serif!important}
+h1,h2,.hud-title{font-family:'Rajdhani',Arial,sans-serif!important;letter-spacing:.04em}
+.tactical-panel{background:linear-gradient(160deg,rgba(24,32,46,.96),rgba(12,16,24,.96));border:1px solid #2b3a52;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05)}
+.tactical-btn{border-radius:8px;backdrop-filter:blur(6px)}
+.deploy-btn{background:linear-gradient(135deg,#0891b2,#2563eb);border-color:#67e8f9;box-shadow:0 0 18px rgba(34,211,238,.35)}
+h1{background:linear-gradient(180deg,#fff,#67e8f9 70%,#0ea5e9);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(34,211,238,.45))}
+.hg-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.hg-tab{padding:7px 14px;font-size:12px;font-weight:600;border:1px solid #2b3a52;border-radius:8px;background:#0e1116;color:#94a3b8;cursor:pointer}
+.hg-tab.on{background:#0e2a3a;border-color:#22d3ee;color:#fff;box-shadow:0 0 12px rgba(34,211,238,.3)}
+.hg-sec{display:none}.hg-sec.on{display:block}
+.statbar{height:4px;background:#1e293b;border-radius:2px;margin-top:4px;overflow:hidden}.statbar i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa)}
+.wcard canvas{width:100%;height:46px;display:block;margin-bottom:4px}
+.kb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid #1e293b;font-size:12px}
+.kb-slot{min-width:74px;padding:4px 8px;border:1px solid #334155;border-radius:6px;background:#0e1116;color:#e2e8f0;font-size:11px;cursor:pointer}
+.kb-slot.wait{border-color:#22d3ee;color:#22d3ee;animation:bl .8s infinite}@keyframes bl{50%{opacity:.4}}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <!-- Fullscreen 2.5D Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Top-Right Utility Controls (Visible during gameplay) -->
+  <div id="topHudControls" class="hidden fixed top-3 right-3 z-20 flex items-center gap-2">
+    <button id="btnHudHelp" class="tactical-btn px-3 py-1.5 text-xs font-bold tracking-wide cursor-pointer">
+      HOW TO PLAY [H]
+    </button>
+    <button id="btnHudAudio" class="tactical-btn px-3 py-1.5 text-xs font-bold tracking-wide cursor-pointer">
+      AUDIO: ON [M]
+    </button>
+    <button id="btnHudMenu" class="tactical-btn px-3 py-1.5 text-xs font-bold tracking-wide cursor-pointer">
+      TITLE MENU [ESC]
+    </button>
+  </div>
+
+  <!-- Touch / Mouse Quick Action Bar (Bottom-Right during active combat) -->
+  <div id="touchActionBar" class="hidden fixed bottom-4 right-4 z-20 flex items-center gap-2">
+    <button id="btnActJump" class="tactical-btn px-3 py-2.5 text-xs font-bold cursor-pointer">JUMP [SPC]</button>
+    <button id="btnActDash" class="tactical-btn px-3 py-2.5 text-xs font-bold text-cyan-300 cursor-pointer">DASH [E]</button>
+    <button id="btnActGrenade" class="tactical-btn px-3 py-2.5 text-xs font-bold text-amber-300 cursor-pointer">GRENADE [Q]</button>
+    <button id="btnActWave" class="tactical-btn px-3 py-2.5 text-xs font-bold text-sky-300 cursor-pointer">WAVE [L]</button>
+    <button id="btnActSlash" class="deploy-btn px-4 py-2.5 text-xs font-bold cursor-pointer">SLASH [J]</button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 1. RETRO LEFT-EDGE TITLE SCREEN OVER LIVE 2.5D STREET SCENE           -->
+  <!-- ===================================================================== -->
+  <div id="titleScreen" class="fixed inset-0 z-30 flex items-center pointer-events-auto">
+    <div class="w-full h-full flex flex-col justify-between p-6 sm:p-10 bg-gradient-to-r from-[#0e1116]/95 via-[#0e1116]/65 to-transparent">
+      <!-- Top Left Retro Header -->
+      <div>
+        <div class="inline-block px-2.5 py-1 mb-2 text-[11px] font-bold tracking-widest uppercase bg-[#141a22] border border-[#2b3544] text-slate-300 rounded">
+          ARCADE 2.5D BELT-SCROLLER // VER 4.0
+        </div>
+        <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-white">
+          CYBER-SLASH
+        </h1>
+        <p class="text-sm sm:text-base font-bold tracking-widest text-slate-400 mt-1">
+          NEO-STREETS // TACTICAL BLADE EDITION
+        </p>
+      </div>
+
+      <!-- Left-Edge Vertical Retro Menu -->
+      <div class="w-72 sm:w-80 tactical-panel p-3 shadow-2xl">
+        <div class="text-[11px] font-bold text-slate-400 px-3 py-1.5 border-b border-[#2b3544] mb-1.5">
+          SYSTEM COMMAND
+        </div>
+        <ul id="retroMenuList" class="space-y-1">
+          <li>
+            <button data-menu="0" class="retro-menu-item selected w-full text-left px-3 py-2.5 text-sm font-bold text-slate-300 rounded cursor-pointer">
+              <span class="menu-cursor inline-block w-5 text-sky-400">►</span> PLAY GAME
+            </button>
+          </li>
+          <li>
+            <button data-menu="1" class="retro-menu-item w-full text-left px-3 py-2.5 text-sm font-bold text-slate-300 rounded cursor-pointer">
+              <span class="menu-cursor inline-block w-5 text-transparent">►</span> OPTIONS
+            </button>
+          </li>
+          <li>
+            <button data-menu="2" class="retro-menu-item w-full text-left px-3 py-2.5 text-sm font-bold text-slate-300 rounded cursor-pointer">
+              <span class="menu-cursor inline-block w-5 text-transparent">►</span> HOW TO PLAY
+            </button>
+          </li>
+          <li>
+            <button data-menu="3" class="retro-menu-item w-full text-left px-3 py-2.5 text-sm font-bold text-slate-300 rounded cursor-pointer">
+              <span class="menu-cursor inline-block w-5 text-transparent">►</span> EXIT
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Bottom Hint -->
+      <div class="text-xs text-slate-400">
+        USE <kbd>↑</kbd> <kbd>↓</kbd> AND <kbd>ENTER</kbd> OR CLICK TO SELECT
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 2. POST-PLAY GAME DEPLOYMENT HANGAR (WEAPONS, SUIT, STAGES, MODS)      -->
+  <!-- ===================================================================== -->
+  <div id="hangarModal" class="hidden fixed inset-0 z-30 flex items-center justify-center bg-[#0e1116]/92 p-3 sm:p-6 overflow-y-auto">
+    <div class="w-full max-w-6xl tactical-panel p-4 sm:p-6 shadow-2xl my-auto">
+      <!-- Hangar Header -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-[#2b3544]">
+        <div>
+          <span class="text-[11px] font-bold tracking-widest text-slate-400 uppercase">UNIT KAI-09 // PRE-MISSION ARMORY</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">DEPLOYMENT HANGAR</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnHangarHelp" class="tactical-btn px-3 py-2 text-xs font-bold cursor-pointer">HOW TO PLAY</button>
+          <button id="btnHangarBack" class="tactical-btn px-3 py-2 text-xs font-bold cursor-pointer">◄ BACK TO TITLE</button>
+        </div>
+      </div>
+
+      <!-- Main Grid: Live 2.5D Preview + Suit/Weapon Selectors | Stages + Augments -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left 5 Cols: Live 2.5D KAI-09 Preview + Suit & Weapon Arrows -->
+        <div class="lg:col-span-5 flex flex-col gap-3">
+          <div class="bg-[#0e1116] border border-[#2b3544] rounded-md p-2 flex flex-col items-center">
+            <div class="w-full flex justify-between items-center px-2 py-1 text-[11px] font-bold text-slate-400">
+              <span>LIVE 2.5D UNIT PREVIEW</span>
+              <span id="previewBadge" class="text-slate-200">50 HP // 100 EN</span>
+            </div>
+            <canvas id="previewCanvas" width="380" height="230" class="w-full h-48 sm:h-56 rounded bg-[#0b0e13]"></canvas>
+          </div>
+
+          <!-- Suit Color Selector -->
+          <div class="bg-[#0e1116] border border-[#2b3544] rounded-md p-3">
+            <div class="text-[11px] font-bold text-slate-400 mb-2">EXOSUIT COLOR CONFIGURATION</div>
+            <div class="flex items-center justify-between gap-2">
+              <button id="btnSuitPrev" class="tactical-btn px-3.5 py-2 text-sm font-bold cursor-pointer">◄</button>
+              <div class="flex items-center gap-2.5">
+                <span id="suitSwatch" class="w-4 h-4 rounded-sm border border-white/40 inline-block"></span>
+                <span id="suitNameLabel" class="text-xs sm:text-sm font-bold text-white">KAI-09 COBALT</span>
+              </div>
+              <button id="btnSuitNext" class="tactical-btn px-3.5 py-2 text-sm font-bold cursor-pointer">►</button>
+            </div>
+          </div>
+
+          <!-- Weapon Selector with BROWN Arrows -->
+          <div class="bg-[#0e1116] border border-[#2b3544] rounded-md p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-bold text-slate-400">PRIMARY BLADE ARMAMENT</span>
+              <span id="weaponStatTag" class="text-[11px] font-bold text-amber-300">BALANCED // 24 DMG</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <button id="btnWeaponPrev" class="brown-arrow-btn px-4 py-2 text-sm cursor-pointer" title="Previous Weapon">◄</button>
+              <div class="text-center flex-1">
+                <div id="weaponNameLabel" class="text-xs sm:text-sm font-bold text-white">MK-IV PLASMA KATANA</div>
+                <div id="weaponDescLabel" class="text-[11px] text-slate-400 mt-0.5">High-speed cyan plasma edge with wide crescent slashes.</div>
+              </div>
+              <button id="btnWeaponNext" class="brown-arrow-btn px-4 py-2 text-sm cursor-pointer" title="Next Weapon">►</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 7 Cols: Weapon Cards, Stage Cards & Combat Augment Cards -->
+        <div class="lg:col-span-7 flex flex-col justify-between gap-3">
+          <!-- 4 Visual Weapon Cards -->
+          <div>
+            <div class="text-[11px] font-bold text-slate-400 mb-1.5">SELECTABLE BLADES (CLICK OR USE BROWN ARROWS)</div>
+            <div id="weaponCardsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          </div>
+
+          <!-- 4 Starting Stage Cards -->
+          <div>
+            <div class="text-[11px] font-bold text-slate-400 mb-1.5">DEPLOYMENT SECTOR (LINEAR PROGRESSION TO STAGE 05 OMEGA CORE)</div>
+            <div id="stageCardsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          </div>
+
+          <!-- 3 Combat Augment Cards -->
+          <div>
+            <div class="text-[11px] font-bold text-slate-400 mb-1.5">TACTICAL COMBAT AUGMENT</div>
+            <div id="augmentCardsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+          </div>
+
+          <!-- Deploy Action Footer -->
+          <div class="pt-2 border-t border-[#2b3544] flex flex-wrap items-center justify-between gap-3">
+            <div class="text-xs text-slate-300">
+              <span class="font-bold text-white">LIFE:</span> 50 HP &nbsp;|&nbsp;
+              <span class="font-bold text-amber-300">GRENADE:</span> [Q] (1.0s) &nbsp;|&nbsp;
+              <span class="font-bold text-cyan-300">DASH:</span> [E] (esquiva com invulnerabilidade)
+            </div>
+            <button id="btnDeployMission" class="deploy-btn px-6 py-3 text-sm font-bold tracking-wide cursor-pointer">
+              DEPLOY TO SECTOR ►
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 3. HOW TO PLAY MODAL                                                  -->
+  <!-- ===================================================================== -->
+  <div id="howToPlayModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-[#0e1116]/90 p-4">
+    <div class="w-full max-w-2xl tactical-panel p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#2b3544]">
+        <h2 class="text-lg font-bold text-white">HOW TO PLAY // FIELD MANUAL</h2>
+        <button id="btnCloseHelp" class="tactical-btn px-3 py-1 text-xs font-bold cursor-pointer">CLOSE [ESC]</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-xs">
+        <div class="bg-[#0e1116] border border-[#2b3544] p-3 rounded">
+          <div class="font-bold text-white mb-2">COMBAT &amp; MOVEMENT CONTROLS</div>
+          <ul class="space-y-1.5 text-slate-300">
+            <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / <kbd>ARROWS</kbd> — Move X &amp; Z Depth</li>
+            <li><kbd>SPACE</kbd> — Jump (Air Slash supported)</li>
+            <li><kbd>J</kbd> / <kbd>Z</kbd> / <kbd>LEFT-CLICK</kbd> — 3-Hit Blade Combo</li>
+            <li><kbd>E</kbd> — <strong>Cyber-Dash</strong> (Invulnerable + Kills Ground Lurkers)</li>
+            <li><kbd>Q</kbd> — <strong>Splash Grenade</strong> (2.0s fuse, 3 charges per sector)</li>
+            <li><kbd>L</kbd> / <kbd>X</kbd> — Overdrive Energy Wave (Costs 50 Energy)</li>
+          </ul>
+        </div>
+
+        <div class="bg-[#0e1116] border border-[#2b3544] p-3 rounded">
+          <div class="font-bold text-white mb-2">ENEMY INTEL &amp; SURVIVAL RULES</div>
+          <ul class="space-y-1.5 text-slate-300">
+            <li><span class="text-emerald-400 font-bold">50 HP Life Line:</span> 10 segments (5 HP each).</li>
+            <li><span class="text-sky-300 font-bold">Street Objects:</span> Smash crates &amp; barrels for <strong>+5 HP</strong> &amp; <strong>+10 Energy</strong>.</li>
+            <li><span class="text-slate-200 font-bold">Weak Enemies (5 DMG):</span> Street Striker, Wasp Drone, and <strong>Ground Lurker</strong>.</li>
+            <li><span class="text-amber-300 font-bold">Ground Lurker:</span> ao ser <strong>tocado</strong> (contato, golpe ou dash) arma e <strong>explode em 2s</strong>. Afaste-se ou mate-o antes!</li>
+            <li><span class="text-orange-400 font-bold">Cyber Enforcer (12 DMG):</span> Break shield first.</li>
+            <li><span class="text-rose-400 font-bold">Stage &amp; Omega Bosses (15 DMG):</span> Defeat all 4 Stage Bosses to breach Stage 05 <strong>OMEGA-NEMESIS (1,500 HP)</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="text-right">
+        <button id="btnConfirmHelp" class="deploy-btn px-5 py-2 text-xs font-bold cursor-pointer">UNDERSTOOD</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 4. OPTIONS MODAL                                                      -->
+  <!-- ===================================================================== -->
+  <div id="optionsModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-[#0e1116]/90 p-4">
+    <div class="w-full max-w-lg tactical-panel p-6 shadow-2xl" style="max-height:92vh;overflow:auto">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#2b3544]">
+        <h2 class="text-lg font-bold text-white">SYSTEM OPTIONS</h2>
+        <button id="btnCloseOptions" class="tactical-btn px-3 py-1 text-xs font-bold cursor-pointer">CLOSE</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="flex items-center justify-between bg-[#0e1116] border border-[#2b3544] p-3 rounded">
+          <div>
+            <div class="font-bold text-white">SYNTHESIZER AUDIO &amp; SFX</div>
+            <div class="text-slate-400">Includes "faaaaaaah" Cyber-Dash vocal sweep</div>
+          </div>
+          <button id="btnOptAudio" class="tactical-btn px-4 py-2 font-bold text-emerald-400 cursor-pointer">ENABLED</button>
+        </div>
+
+        <div class="flex items-center justify-between bg-[#0e1116] border border-[#2b3544] p-3 rounded">
+          <div>
+            <div class="font-bold text-white">IMPACT CAMERA SHAKE</div>
+            <div class="text-slate-400">Screen shake on heavy slashes &amp; 1.0s grenades</div>
+          </div>
+          <button id="btnOptShake" class="tactical-btn px-4 py-2 font-bold text-emerald-400 cursor-pointer">ENABLED</button>
+        </div>
+
+        <div class="bg-[#0e1116] border border-[#2b3544] p-3 rounded">
+          <div class="flex items-center justify-between mb-1"><div class="font-bold text-white">CONTROLES (clique e aperte a tecla)</div><button id="btnKbReset" class="tactical-btn px-2 py-1 text-[11px] font-bold cursor-pointer">RESTAURAR</button></div>
+          <div id="kbList" style="max-height:220px;overflow:auto"></div>
+          <div class="text-[10px] text-slate-500 mt-1">Cada ação aceita 2 teclas. Esc cancela. Salvo automaticamente.</div>
+        </div>
+
+        <div class="bg-[#0e1116] border border-[#2b3544] p-3 rounded text-slate-300">
+          <div class="font-bold text-white mb-1">COMBAT BALANCE TELEMETRY</div>
+          <div>Player Max Life: <strong>50 HP</strong> | Crate Drop: <strong>+5 HP / +10 EN</strong></div>
+          <div>Enemy Tiers: <strong>5 DMG</strong> (Weak) / <strong>12 DMG</strong> (Enforcer) / <strong>15 DMG</strong> (Boss)</div>
+        </div>
+      </div>
+
+      <div class="mt-5 text-right">
+        <button id="btnSaveOptions" class="deploy-btn px-5 py-2 text-xs font-bold cursor-pointer">APPLY &amp; RETURN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 5. EXIT / STANDBY SCREEN                                              -->
+  <!-- ===================================================================== -->
+  <div id="exitScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[#0e1116] p-4">
+    <div class="max-w-md w-full tactical-panel p-8 text-center">
+      <div class="text-xs font-bold text-slate-400 tracking-widest mb-2">TERMINAL SESSION HALTED</div>
+      <h2 class="text-2xl font-bold text-white mb-3">UNIT KAI-09 IN STANDBY</h2>
+      <p class="text-xs text-slate-400 mb-6">
+        Combat simulation suspended. All telemetry and weapon calibrations saved in memory.
+      </p>
+      <button id="btnRebootSystem" class="deploy-btn px-6 py-3 text-xs font-bold tracking-wide cursor-pointer">
+        REBOOT SIMULATION
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 6. MISSION END / DEFEAT / IMPOSSIBLE VICTORY MODAL                    -->
+  <!-- ===================================================================== -->
+  <div id="endModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-[#0e1116]/90 p-4">
+    <div class="max-w-lg w-full tactical-panel p-7 text-center shadow-2xl">
+      <div id="endSubtitle" class="text-xs font-bold tracking-widest text-slate-400 mb-1">MISSION STATUS</div>
+      <h2 id="endTitle" class="text-3xl font-bold text-white mb-3">UNIT OFFLINE</h2>
+      <p id="endStats" class="text-sm text-slate-300 mb-6">
+        SCORE: 0 | HOSTILES NEUTRALIZED: 0
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button id="btnRetryHangar" class="deploy-btn px-6 py-3 text-xs font-bold cursor-pointer">
+          RETURN TO HANGAR
+        </button>
+        <button id="btnEndTitle" class="tactical-btn px-5 py-3 text-xs font-bold cursor-pointer">
+          TITLE SCREEN
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * TOP-OF-SCRIPT MODULAR CONFIGURATION ARRAYS
+ * Edit these arrays directly to customize suits, weapons, stages, augments,
+ * and the Stage 05 Final Boss (OMEGA-NEMESIS).
+ * ============================================================================
+ */
+const SUIT_COLORS = [
+  {
+    id: 'cobalt',
+    name: 'KAI-09 COBALT',
+    primary: '#1e293b',
+    trim: '#38bdf8',
+    visor: '#67e8f9',
+    scarfMain: '#ea580c',
+    scarfAlt: '#f59e0b'
+  },
+  {
+    id: 'crimson',
+    name: 'CRIMSON VANGUARD',
+    primary: '#291518',
+    trim: '#f43f5e',
+    visor: '#fda4af',
+    scarfMain: '#e2e8f0',
+    scarfAlt: '#94a3b8'
+  },
+  {
+    id: 'gold',
+    name: 'PHANTOM GOLD',
+    primary: '#221f17',
+    trim: '#facc15',
+    visor: '#fef08a',
+    scarfMain: '#dc2626',
+    scarfAlt: '#f97316'
+  },
+  {
+    id: 'emerald',
+    name: 'EMERALD SPEC-OPS',
+    primary: '#13241e',
+    trim: '#10b981',
+    visor: '#6ee7b7',
+    scarfMain: '#f59e0b',
+    scarfAlt: '#fde047'
+  },
+  {
+    id: 'arctic',
+    name: 'ARCTIC GHOST',
+    primary: '#334155',
+    trim: '#e0f2fe',
+    visor: '#38bdf8',
+    scarfMain: '#0284c7',
+    scarfAlt: '#7dd3fc'
+  }
+];
+
+const WEAPON_CARDS = [
+  {
+    id: 'katana',
+    name: 'MK-IV PLASMA KATANA',
+    tag: 'BALANCED // 24 DMG',
+    desc: 'Sleek curved cyan plasma blade with tsuba guard and crescent arcs.',
+    damage: 24,
+    reach: 102,
+    bladeColor: '#06b6d4',
+    coreColor: '#ffffff',
+    glowColor: '#22d3ee'
+  },
+  {
+    id: 'claymore',
+    name: 'VULCAN CLAYMORE',
+    tag: 'HEAVY // 36 DMG',
+    desc: 'Massive serrated industrial magma greatsword with flame shock-cleaves.',
+    damage: 36,
+    reach: 124,
+    bladeColor: '#ea580c',
+    coreColor: '#fef08a',
+    glowColor: '#f97316'
+  },
+  {
+    id: 'twin',
+    name: 'SPECTRE TWIN BLADES',
+    tag: 'RAPID // 20x2 DMG',
+    desc: 'Dual reverse-grip violet-magenta energy blades in both hands.',
+    damage: 20,
+    reach: 92,
+    bladeColor: '#c026d3',
+    coreColor: '#fae8ff',
+    glowColor: '#e879f9'
+  },
+  {
+    id: 'glaive',
+    name: 'CRYO-ARC GLAIVE',
+    tag: 'LONG REACH // 28 DMG',
+    desc: 'Two-handed frost-cyan polearm halberd with orbiting ice crystals.',
+    damage: 28,
+    reach: 136,
+    bladeColor: '#0284c7',
+    coreColor: '#e0f2fe',
+    glowColor: '#38bdf8'
+  }
+];
+
+const STAGE_CARDS = [
+  {
+    id: 'cool',
+    number: 1,
+    name: 'NEO-STREETS PLAZA',
+    tag: 'SECTOR 01 // TRANSIT HUB',
+    desc: 'Rain-slicked transit plaza, elevated monorail, and exploding Ground Lurkers.',
+    length: 2550,
+    yMin: 446,
+    yMax: 676,
+    skyTop: '#070b14',
+    skyMid: '#0f172a',
+    skyBot: '#1e293b',
+    accent: '#38bdf8',
+    floorBase: '#12161f',
+    floorLine: '#283244',
+    windX: 0,
+    boss: {
+      name: 'WARDEN VEX',
+      title: 'SECTOR 01 ENFORCER COMMANDER',
+      hp: 340,
+      color: '#38bdf8',
+      accent: '#f97316'
+    },
+    waves: [
+      { triggerX: 360, lockX: 460, enemies: ['striker', 'lurker', 'drone'] },
+      { triggerX: 1120, lockX: 1220, enemies: ['lurker', 'striker', 'enforcer', 'drone'] },
+      { triggerX: 1880, lockX: 1980, enemies: ['lurker', 'lurker', 'enforcer', 'drone'] }
+    ]
+  },
+  {
+    id: 'hot',
+    number: 2,
+    name: 'MAGMA FOUNDRY',
+    tag: 'SECTOR 02 // SMELTER CORE',
+    desc: 'Molten blast furnaces, glowing slag channels, and thermal vents.',
+    length: 2550,
+    yMin: 448,
+    yMax: 674,
+    skyTop: '#140805',
+    skyMid: '#2e1008',
+    skyBot: '#5c1d0c',
+    accent: '#fb923c',
+    floorBase: '#191312',
+    floorLine: '#3d1c14',
+    windX: 0,
+    boss: {
+      name: 'IGNIS-PRIME',
+      title: 'MOLTEN SIEGE JUGGERNAUT',
+      hp: 420,
+      color: '#fb923c',
+      accent: '#fef08a'
+    },
+    waves: [
+      { triggerX: 360, lockX: 460, enemies: ['striker', 'enforcer', 'lurker'] },
+      { triggerX: 1120, lockX: 1220, enemies: ['enforcer', 'drone', 'drone', 'striker'] },
+      { triggerX: 1880, lockX: 1980, enemies: ['enforcer', 'enforcer', 'lurker', 'drone'] }
+    ]
+  },
+  {
+    id: 'thin',
+    number: 3,
+    name: 'SKY-GRATE CATWALK',
+    tag: 'SECTOR 03 // HIGH ALTITUDE',
+    desc: 'Narrow suspended steel bridge — knock enemies into the abyss!',
+    length: 2550,
+    yMin: 504,
+    yMax: 612,
+    skyTop: '#060a12',
+    skyMid: '#0d1b2e',
+    skyBot: '#1b314e',
+    accent: '#f59e0b',
+    floorBase: '#1a2230',
+    floorLine: '#364459',
+    windX: 0,
+    boss: {
+      name: 'AERO-VALKYRIE',
+      title: 'SUPERSONIC SKY-MARSHAL',
+      hp: 460,
+      color: '#f59e0b',
+      accent: '#38bdf8'
+    },
+    waves: [
+      { triggerX: 360, lockX: 460, enemies: ['striker', 'striker', 'drone'] },
+      { triggerX: 1120, lockX: 1220, enemies: ['enforcer', 'striker', 'lurker'] },
+      { triggerX: 1880, lockX: 1980, enemies: ['enforcer', 'striker', 'drone', 'drone'] }
+    ]
+  },
+  {
+    id: 'snow',
+    number: 4,
+    name: 'CRYO-SECTOR OUTPOST',
+    tag: 'SECTOR 04 // FROZEN CITADEL',
+    desc: 'Frosted scaffolding, hanging icicles, and heavy blizzard wind gusts.',
+    length: 2600,
+    yMin: 448,
+    yMax: 674,
+    skyTop: '#08101c',
+    skyMid: '#13263d',
+    skyBot: '#294b70',
+    accent: '#7dd3fc',
+    floorBase: '#1b2432',
+    floorLine: '#64748b',
+    windX: -1.1,
+    boss: {
+      name: 'ZERO-ABSOLUTE',
+      title: 'CRYO-CORE OVERLORD',
+      hp: 520,
+      color: '#7dd3fc',
+      accent: '#e0f2fe'
+    },
+    waves: [
+      { triggerX: 360, lockX: 460, enemies: ['enforcer', 'lurker', 'drone'] },
+      { triggerX: 1120, lockX: 1220, enemies: ['enforcer', 'enforcer', 'drone'] },
+      { triggerX: 1900, lockX: 2000, enemies: ['enforcer', 'lurker', 'striker', 'drone', 'drone'] }
+    ]
+  }
+];
+
+const AUGMENT_CARDS = [
+  {
+    id: 'capacitor',
+    name: 'OVERCLOCKED CAPACITOR',
+    tag: '+35% ENERGY GAIN',
+    desc: 'Faster plasma recharge and bonus energy on every blade hit.'
+  },
+  {
+    id: 'plating',
+    name: 'REACTIVE NANO-WEAVE',
+    tag: '+25% DASH & GRENADE',
+    desc: 'Wider Cyber-Dash [E] shock-trail and +25% Grenade [Q] splash radius.'
+  },
+  {
+    id: 'edge',
+    name: 'SERRATED EDGE MATRIX',
+    tag: '+20% BLADE DAMAGE',
+    desc: 'Increases base melee slash damage across all 4 selectable blades.'
+  }
+];
+
+const FINAL_BOSS_DATA = {
+  id: 'omega',
+  number: 5,
+  name: 'OMEGA CORE REACTOR',
+  tag: 'FINAL STAGE 05 // THREAT: IMPOSSIBLE',
+  length: 1480,
+  yMin: 448,
+  yMax: 676,
+  skyTop: '#09050c',
+  skyMid: '#1c0a18',
+  skyBot: '#381022',
+  accent: '#ef4444',
+  floorBase: '#141118',
+  floorLine: '#4c1d3d',
+  windX: 0,
+  boss: {
+    name: 'OMEGA-NEMESIS',
+    title: 'APEX BIOMECHANICAL WARLORD [IMPOSSIBLE]',
+    hp: 1500,
+    color: '#ef4444',
+    accent: '#facc15'
+  }
+};
+
+// ============================================================================
+// PROCEDURAL WEB AUDIO ENGINE (INCLUDING VOCAL-FORMANT "FAAAAAAAH" DASH)
+// ============================================================================
+class TacticalAudio {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+    this.bgmTimer = null;
+    this.step = 0;
+  }
+
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioCtx();
+    }
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+    if (this.enabled && !this.bgmTimer) {
+      this.startBGM();
+    }
+  }
+
+  toggle() {
+    this.enabled = !this.enabled;
+    if (!this.enabled) {
+      clearInterval(this.bgmTimer);
+      this.bgmTimer = null;
+    } else {
+      this.init();
+    }
+    return this.enabled;
+  }
+
+  playTone(freq, type, duration, vol = 0.12, slideTo = null, delay = 0) {
+    if (!this.enabled) return;
+    if (!this.ctx) this.init();
+    const now = this.ctx.currentTime + delay;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if (slideTo) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), now + duration);
+    }
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  }
+
+  playNoise(duration, vol = 0.16, filterFreq = 1200, filterType = 'bandpass') {
+    if (!this.enabled) return;
+    if (!this.ctx) this.init();
+    const len = Math.floor(this.ctx.sampleRate * duration);
+    const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.value = filterFreq;
+
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    src.start(now);
+  }
+
+  // Vocal-Formant "FAAAAAAAH" Cyber-Dash Sound Effect
+  sfxDashFaaaaah() {
+    if (!this.enabled) return;
+    if (!this.ctx) this.init();
+    const now = this.ctx.currentTime;
+    const dur = 0.52;
+
+    // 1. Initial "Fff-" breathy consonant burst
+    this.playNoise(0.14, 0.22, 3400, 'highpass');
+
+    // 2. Sustained open-vowel "-aaaaaaah" formant voice
+    const voiceOsc = this.ctx.createOscillator();
+    voiceOsc.type = 'sawtooth';
+    voiceOsc.frequency.setValueAtTime(195, now + 0.04);
+    voiceOsc.frequency.linearRampToValueAtTime(225, now + 0.18);
+    voiceOsc.frequency.exponentialRampToValueAtTime(142, now + dur);
+
+    // Parallel Formant Filters tuned to open "AH" vowel (F1 ~ 760Hz, F2 ~ 1220Hz)
+    const f1 = this.ctx.createBiquadFilter();
+    f1.type = 'bandpass';
+    f1.frequency.setValueAtTime(760, now);
+    f1.Q.value = 5.5;
+
+    const f2 = this.ctx.createBiquadFilter();
+    f2.type = 'bandpass';
+    f2.frequency.setValueAtTime(1220, now);
+    f2.Q.value = 6.5;
+
+    const voiceGain = this.ctx.createGain();
+    voiceGain.gain.setValueAtTime(0.001, now);
+    voiceGain.gain.linearRampToValueAtTime(0.24, now + 0.08);
+    voiceGain.gain.setValueAtTime(0.21, now + 0.34);
+    voiceGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    voiceOsc.connect(f1);
+    voiceOsc.connect(f2);
+    f1.connect(voiceGain);
+    f2.connect(voiceGain);
+    voiceGain.connect(this.ctx.destination);
+
+    voiceOsc.start(now + 0.03);
+    voiceOsc.stop(now + dur);
+  }
+
+  sfxSlash(step = 1, weaponId = 'katana') {
+    const pitchMult = weaponId === 'claymore' ? 0.72 : (weaponId === 'twin' ? 1.25 : 1.0);
+    const base = (step === 1 ? 560 : (step === 2 ? 720 : 890)) * pitchMult;
+    this.playNoise(0.14, 0.16, 2100, 'highpass');
+    this.playTone(base, 'sawtooth', 0.14, 0.11, 130);
+  }
+
+  sfxHit(heavy = false) {
+    this.playNoise(heavy ? 0.2 : 0.11, heavy ? 0.24 : 0.16, 650, 'lowpass');
+    this.playTone(heavy ? 125 : 185, 'square', heavy ? 0.17 : 0.09, 0.15, 42);
+  }
+
+  sfxArmorClang() {
+    this.playTone(1450, 'triangle', 0.08, 0.18, 920);
+    this.playTone(2180, 'sine', 0.11, 0.14, 1600);
+  }
+
+  sfxGrenadeThrow() {
+    this.playTone(340, 'sine', 0.14, 0.12, 620);
+  }
+
+  sfxGrenadeBeep(urgent = false) {
+    this.playTone(urgent ? 1320 : 980, 'square', 0.05, 0.08);
+  }
+
+  sfxGrenadeBoom() {
+    this.playNoise(0.45, 0.34, 480, 'lowpass');
+    this.playTone(110, 'sawtooth', 0.38, 0.24, 28);
+  }
+
+  sfxPlasmaWave() {
+    this.playNoise(0.26, 0.18, 1600, 'bandpass');
+    this.playTone(840, 'sawtooth', 0.3, 0.15, 155);
+  }
+
+  sfxCrateBreak() {
+    this.playNoise(0.22, 0.22, 900, 'lowpass');
+    this.playTone(210, 'square', 0.13, 0.13, 55);
+  }
+
+  sfxPickup() {
+    this.playTone(660, 'sine', 0.08, 0.12);
+    this.playTone(990, 'sine', 0.13, 0.13, null, 0.06);
+  }
+
+  sfxStageClear() {
+    [440, 554.37, 659.25, 880].forEach((n, i) => {
+      this.playTone(n, 'triangle', 0.17, 0.12, null, i * 0.075);
+    });
+  }
+
+  startBGM() {
+    const bass = [73.42, 73.42, 87.31, 73.42, 110.0, 98.0, 87.31, 65.41];
+    this.bgmTimer = setInterval(() => {
+      if (!this.enabled) return;
+      this.playTone(bass[this.step % bass.length], 'sawtooth', 0.18, 0.026);
+      this.step++;
+    }, 205);
+  }
+}
+
+const sfx = new TacticalAudio();
+
+// ============================================================================
+// MAIN GAME ENGINE
+// ============================================================================
+class CyberSlashGame {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.W = 1280;
+    this.H = 720;
+
+    this.previewCanvas = document.getElementById('previewCanvas');
+    this.pCtx = this.previewCanvas.getContext('2d');
+
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+
+    // App State: 'TITLE' | 'HANGAR' | 'PLAYING' | 'TRANSITION' | 'ENDED'
+    this.appState = 'TITLE';
+    this.menuIndex = 0;
+    this.shakeEnabled = true;
+
+    // Loadout Selections
+    this.selectedSuitIdx = 0;
+    this.selectedWeaponIdx = 0;
+    this.selectedStageIdx = 0;
+    this.selectedAugmentIdx = 0;
+
+    // Stage & Combat State
+    this.stageIdx = 0;
+    this.isFinalOmegaStage = false;
+    this.cameraX = 0;
+    this.cameraLocked = false;
+    this.lockTargetX = 0;
+    this.currentWaveIdx = 0;
+    this.waveSpawned = false;
+    this.bossSpawned = false;
+    this.transitionTimer = 0;
+
+    this.score = 0;
+    this.kills = 0;
+    this.combo = 0;
+    this.comboTimer = 0;
+    this.comboScale = 1;
+
+    this.hitstopTimer = 0;
+    this.shakeTimer = 0;
+    this.shakeIntensity = 0;
+    this.stageBannerTimer = 0;
+    this.blizzardTimer = 0;
+    this.blizzardActive = false;
+
+    this.keys = {};
+    this.player = this.createPlayer();
+    this.enemies = [];
+    this.props = [];
+    this.pickups = [];
+    this.grenades = [];
+    this.projectiles = [];
+    this.slashTrails = [];
+    this.afterimages = [];
+    this.particles = [];
+    this.floatingTexts = [];
+    this.vents = [];
+    this.weatherParticles = [];
+    this.monorail = { x: -300, speed: 6.5 };
+
+    this.initAmbient();
+    this.buildHangarCards();
+    this.bindUIEvents();
+    this.loadStage(0, false);
+
+    this.loop = this.loop.bind(this);
+    requestAnimationFrame(this.loop);
+  }
+
+  resizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = this.W * dpr;
+    this.canvas.height = this.H * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  getActiveStageConfig() {
+    return this.isFinalOmegaStage ? FINAL_BOSS_DATA : STAGE_CARDS[this.stageIdx];
+  }
+
+  getActiveWeapon() {
+    return WEAPON_CARDS[this.selectedWeaponIdx];
+  }
+
+  getActiveSuit() {
+    return SUIT_COLORS[this.selectedSuitIdx];
+  }
+
+  getActiveAugment() {
+    return AUGMENT_CARDS[this.selectedAugmentIdx];
+  }
+
+  createPlayer() {
+    const scarfNodes = [];
+    for (let i = 0; i < 8; i++) {
+      scarfNodes.push({ x: 180 - i * 8, y: 490 });
+    }
+    return {
+      x: 190,
+      y: 560,
+      z: 0,
+      vx: 0,
+      vy: 0,
+      vz: 0,
+      facing: 1,
+      hp: 50,
+      maxHp: 50,
+      energy: 100,
+      maxEnergy: 100,
+      grenades: 3,
+      maxGrenades: 3,
+      walkCycle: 0,
+      attackStep: 0,
+      attackTimer: 0,
+      comboBuffer: false,
+      hitTargets: new Set(),
+      dashTimer: 0,
+      dashHitTargets: new Set(),
+      invulnTimer: 0,
+      hurtTimer: 0,
+      scarfNodes
+    };
+  }
+
+  initAmbient() {
+    this.weatherParticles = [];
+    for (let i = 0; i < 120; i++) {
+      this.weatherParticles.push({
+        x: Math.random() * this.W,
+        y: Math.random() * this.H,
+        speed: 7 + Math.random() * 9,
+        len: 10 + Math.random() * 14,
+        size: 2 + Math.random() * 2.5
+      });
+    }
+  }
+
+  // ==========================================================================
+  // HANGAR UI CARDS & LIVE PREVIEW RENDERER
+  // ==========================================================================
+  buildHangarCards() {
+    // 1. Weapon Cards
+    const wGrid = document.getElementById('weaponCardsGrid');
+    wGrid.innerHTML = '';
+    WEAPON_CARDS.forEach((w, idx) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = `tactical-btn p-2.5 text-left cursor-pointer ${idx === this.selectedWeaponIdx ? 'weapon-card-active' : ''}`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-1">
+          <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${w.glowColor}"></span>
+          <span class="text-[10px] font-bold text-amber-300">${w.tag.split('//')[1].trim()}</span>
+        </div>
+        <div class="text-[11px] font-bold text-white leading-tight">${w.name}</div>
+      `;
+      card.addEventListener('click', () => {
+        this.selectedWeaponIdx = idx;
+        this.syncHangarSelections();
+      });
+      wGrid.appendChild(card);
+    });
+
+    // 2. Stage Cards
+    const sGrid = document.getElementById('stageCardsGrid');
+    sGrid.innerHTML = '';
+    STAGE_CARDS.forEach((st, idx) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = `tactical-btn p-2.5 text-left cursor-pointer ${idx === this.selectedStageIdx ? 'card-active' : ''}`;
+      card.innerHTML = `
+        <div class="text-[10px] font-bold" style="color:${st.accent}">STAGE 0${st.number}</div>
+        <div class="text-[11px] font-bold text-white leading-tight mt-0.5">${st.name}</div>
+        <div class="text-[10px] text-slate-400 mt-1">Boss: ${st.boss.name}</div>
+      `;
+      card.addEventListener('click', () => {
+        this.selectedStageIdx = idx;
+        this.syncHangarSelections();
+      });
+      sGrid.appendChild(card);
+    });
+
+    // 3. Augment Cards
+    const aGrid = document.getElementById('augmentCardsGrid');
+    aGrid.innerHTML = '';
+    AUGMENT_CARDS.forEach((aug, idx) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = `tactical-btn p-2.5 text-left cursor-pointer ${idx === this.selectedAugmentIdx ? 'card-active' : ''}`;
+      card.innerHTML = `
+        <div class="text-[10px] font-bold text-sky-400">${aug.tag}</div>
+        <div class="text-[11px] font-bold text-white mt-0.5">${aug.name}</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">${aug.desc}</div>
+      `;
+      card.addEventListener('click', () => {
+        this.selectedAugmentIdx = idx;
+        this.syncHangarSelections();
+      });
+      aGrid.appendChild(card);
+    });
+
+    this.syncHangarSelections();
+  }
+
+  syncHangarSelections() {
+    const suit = this.getActiveSuit();
+    const weapon = this.getActiveWeapon();
+
+    document.getElementById('suitSwatch').style.background = suit.trim;
+    document.getElementById('suitNameLabel').textContent = suit.name;
+
+    document.getElementById('weaponNameLabel').textContent = weapon.name;
+    document.getElementById('weaponStatTag').textContent = weapon.tag;
+    document.getElementById('weaponDescLabel').textContent = weapon.desc;
+
+    document.querySelectorAll('#weaponCardsGrid > button').forEach((btn, i) => {
+      btn.classList.toggle('weapon-card-active', i === this.selectedWeaponIdx);
+    });
+    document.querySelectorAll('#stageCardsGrid > button').forEach((btn, i) => {
+      btn.classList.toggle('card-active', i === this.selectedStageIdx);
+    });
+    document.querySelectorAll('#augmentCardsGrid > button').forEach((btn, i) => {
+      btn.classList.toggle('card-active', i === this.selectedAugmentIdx);
+    });
+  }
+
+  renderHangarPreview() {
+    const ctx = this.pCtx;
+    const W = this.previewCanvas.width;
+    const H = this.previewCanvas.height;
+    const t = performance.now() * 0.004;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Subtle Hangar Pedestal Grid
+    ctx.fillStyle = '#0b0e13';
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    for (let x = 20; x < W; x += 36) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+      ctx.stroke();
+    }
+
+    // Pedestal Platform
+    const cx = W * 0.46;
+    const cy = H * 0.83;
+    ctx.fillStyle = '#141a22';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 95, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = this.getActiveWeapon().glowColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw Live Animated KAI-09 with Selected Suit & Selected Weapon at 1.55x Scale
+    ctx.save();
+    ctx.translate(cx, cy - 4);
+    ctx.scale(1.55, 1.55);
+
+    const suit = this.getActiveSuit();
+    const weapon = this.getActiveWeapon();
+    const breathe = Math.sin(t) * 2;
+
+    // Animated Scarf behind character
+    ctx.strokeStyle = suit.scarfMain;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+      const sx1 = -8 - i * 10;
+      const sy1 = -62 + breathe + Math.sin(t * 1.6 + i * 0.7) * (2 + i * 0.9);
+      const sx2 = -8 - (i + 1) * 10;
+      const sy2 = -62 + breathe + Math.sin(t * 1.6 + (i + 1) * 0.7) * (2 + (i + 1) * 0.9);
+      ctx.lineWidth = Math.max(2, 9 - i);
+      ctx.strokeStyle = i % 2 === 0 ? suit.scarfMain : suit.scarfAlt;
+      ctx.beginPath();
+      ctx.moveTo(sx1, sy1);
+      ctx.lineTo(sx2, sy2);
+      ctx.stroke();
+    }
+
+    this.drawCharacterRig(ctx, suit, weapon, 0, breathe, Math.sin(t * 0.8) * 0.14);
+    ctx.restore();
+
+    // Weapon Label Tag inside preview
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`EQUIPPED: ${weapon.name}`, 12, H - 12);
+  }
+
+  // ==========================================================================
+  // UI & KEYBOARD EVENT BINDINGS
+  // ==========================================================================
+  bindUIEvents() {
+    // Retro Title Menu Navigation
+    const menuItems = document.querySelectorAll('.retro-menu-item');
+    const updateMenuHighlight = (idx) => {
+      this.menuIndex = (idx + 4) % 4;
+      menuItems.forEach((btn, i) => {
+        const sel = i === this.menuIndex;
+        btn.classList.toggle('selected', sel);
+        const cur = btn.querySelector('.menu-cursor');
+        cur.className = `menu-cursor inline-block w-5 ${sel ? 'text-sky-400' : 'text-transparent'}`;
+      });
+    };
+
+    menuItems.forEach((btn, i) => {
+      btn.addEventListener('mouseenter', () => updateMenuHighlight(i));
+      btn.addEventListener('click', () => {
+        sfx.init();
+        updateMenuHighlight(i);
+        this.activateRetroMenu(i);
+      });
+    });
+
+    // Hangar Suit & Brown Weapon Arrows
+    document.getElementById('btnSuitPrev').addEventListener('click', () => {
+      this.selectedSuitIdx = (this.selectedSuitIdx - 1 + SUIT_COLORS.length) % SUIT_COLORS.length;
+      this.syncHangarSelections();
+    });
+    document.getElementById('btnSuitNext').addEventListener('click', () => {
+      this.selectedSuitIdx = (this.selectedSuitIdx + 1) % SUIT_COLORS.length;
+      this.syncHangarSelections();
+    });
+    document.getElementById('btnWeaponPrev').addEventListener('click', () => {
+      this.selectedWeaponIdx = (this.selectedWeaponIdx - 1 + WEAPON_CARDS.length) % WEAPON_CARDS.length;
+      this.syncHangarSelections();
+    });
+    document.getElementById('btnWeaponNext').addEventListener('click', () => {
+      this.selectedWeaponIdx = (this.selectedWeaponIdx + 1) % WEAPON_CARDS.length;
+      this.syncHangarSelections();
+    });
+
+    document.getElementById('btnHangarBack').addEventListener('click', () => {
+      document.getElementById('hangarModal').classList.add('hidden');
+      document.getElementById('titleScreen').classList.remove('hidden');
+      this.appState = 'TITLE';
+    });
+
+    document.getElementById('btnHangarHelp').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.remove('hidden');
+    });
+
+    document.getElementById('btnDeployMission').addEventListener('click', () => {
+      sfx.init();
+      this.startMission();
+    });
+
+    // Modals (How to Play, Options, Exit, End)
+    document.getElementById('btnCloseHelp').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.add('hidden');
+    });
+    document.getElementById('btnConfirmHelp').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnCloseOptions').addEventListener('click', () => {
+      document.getElementById('optionsModal').classList.add('hidden');
+    });
+    document.getElementById('btnSaveOptions').addEventListener('click', () => {
+      document.getElementById('optionsModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnOptAudio').addEventListener('click', (e) => {
+      const on = sfx.toggle();
+      e.target.textContent = on ? 'ENABLED' : 'DISABLED';
+      e.target.className = `tactical-btn px-4 py-2 font-bold cursor-pointer ${on ? 'text-emerald-400' : 'text-rose-400'}`;
+      document.getElementById('btnHudAudio').textContent = `AUDIO: ${on ? 'ON' : 'OFF'} [M]`;
+    });
+
+    document.getElementById('btnOptShake').addEventListener('click', (e) => {
+      this.shakeEnabled = !this.shakeEnabled;
+      e.target.textContent = this.shakeEnabled ? 'ENABLED' : 'DISABLED';
+      e.target.className = `tactical-btn px-4 py-2 font-bold cursor-pointer ${this.shakeEnabled ? 'text-emerald-400' : 'text-rose-400'}`;
+    });
+
+    document.getElementById('btnRebootSystem').addEventListener('click', () => {
+      document.getElementById('exitScreen').classList.add('hidden');
+      document.getElementById('titleScreen').classList.remove('hidden');
+      this.appState = 'TITLE';
+    });
+
+    // Top-Right In-Game HUD Buttons
+    document.getElementById('btnHudHelp').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.remove('hidden');
+    });
+    document.getElementById('btnHudAudio').addEventListener('click', () => {
+      const on = sfx.toggle();
+      document.getElementById('btnHudAudio').textContent = `AUDIO: ${on ? 'ON' : 'OFF'} [M]`;
+    });
+    document.getElementById('btnHudMenu').addEventListener('click', () => {
+      this.returnToTitle();
+    });
+
+    // End Modal Buttons
+    document.getElementById('btnRetryHangar').addEventListener('click', () => {
+      document.getElementById('endModal').classList.add('hidden');
+      this.openHangar();
+    });
+    document.getElementById('btnEndTitle').addEventListener('click', () => {
+      document.getElementById('endModal').classList.add('hidden');
+      this.returnToTitle();
+    });
+
+    // Bottom-Right Touch/Click Action Buttons
+    document.getElementById('btnActJump').addEventListener('pointerdown', (e) => { e.stopPropagation(); this.triggerJump(); });
+    document.getElementById('btnActDash').addEventListener('pointerdown', (e) => { e.stopPropagation(); this.triggerDash(); });
+    document.getElementById('btnActGrenade').addEventListener('pointerdown', (e) => { e.stopPropagation(); this.triggerGrenade(); });
+    document.getElementById('btnActWave').addEventListener('pointerdown', (e) => { e.stopPropagation(); this.triggerPlasmaWave(); });
+    document.getElementById('btnActSlash').addEventListener('pointerdown', (e) => { e.stopPropagation(); this.triggerSlash(); });
+
+    // Global Keyboard Listener
+    window.addEventListener('keydown', (e) => {
+      if (window.__rebind) return;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
+      this.keys[e.code] = true;
+      if (e.repeat) return;
+
+      // Retro Title Menu Keyboard Navigation
+      if (this.appState === 'TITLE' && document.getElementById('howToPlayModal').classList.contains('hidden') && document.getElementById('optionsModal').classList.contains('hidden')) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+          updateMenuHighlight(this.menuIndex - 1);
+          sfx.playTone(520, 'square', 0.05, 0.06);
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+          updateMenuHighlight(this.menuIndex + 1);
+          sfx.playTone(520, 'square', 0.05, 0.06);
+        } else if (e.code === 'Enter' || e.code === 'Space') {
+          sfx.init();
+          this.activateRetroMenu(this.menuIndex);
+        }
+        return;
+      }
+
+      if (e.code === 'Escape') {
+        if (!document.getElementById('howToPlayModal').classList.contains('hidden')) {
+          document.getElementById('howToPlayModal').classList.add('hidden');
+          return;
+        }
+        if (!document.getElementById('optionsModal').classList.contains('hidden')) {
+          document.getElementById('optionsModal').classList.add('hidden');
+          return;
+        }
+        if (this.appState === 'PLAYING' || this.appState === 'TRANSITION') {
+          this.returnToTitle();
+        }
+      }
+
+      if (this.appState !== 'PLAYING') return;
+
+      if (this.isBound('jump',e.code)) this.triggerJump();
+      if (this.isBound('slash',e.code)) this.triggerSlash();
+      if (this.isBound('dash',e.code)) this.triggerDash();
+      if (this.isBound('grenade',e.code)) this.triggerGrenade();
+      if (this.isBound('wave',e.code)) this.triggerPlasmaWave();
+      if (this.isBound('help',e.code)) document.getElementById('howToPlayModal').classList.toggle('hidden');
+      if (this.isBound('mute',e.code)) {
+        const on = sfx.toggle();
+        document.getElementById('btnHudAudio').textContent = `AUDIO: ${on ? 'ON' : 'OFF'} [M]`;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      this.keys[e.code] = false;
+    });
+
+    this.canvas.addEventListener('mousedown', (e) => {
+      if (this.appState !== 'PLAYING') return;
+      sfx.init();
+      if (e.button === 0) this.triggerSlash();
+      if (e.button === 2) this.triggerDash();
+    });
+    this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  activateRetroMenu(idx) {
+    if (idx === 0) {
+      this.openHangar();
+    } else if (idx === 1) {
+      document.getElementById('optionsModal').classList.remove('hidden');
+    } else if (idx === 2) {
+      document.getElementById('howToPlayModal').classList.remove('hidden');
+    } else if (idx === 3) {
+      document.getElementById('titleScreen').classList.add('hidden');
+      document.getElementById('exitScreen').classList.remove('hidden');
+      this.appState = 'EXIT';
+    }
+  }
+
+  openHangar() {
+    document.getElementById('titleScreen').classList.add('hidden');
+    document.getElementById('topHudControls').classList.add('hidden');
+    document.getElementById('touchActionBar').classList.add('hidden');
+    document.getElementById('hangarModal').classList.remove('hidden');
+    this.appState = 'HANGAR';
+    this.syncHangarSelections();
+  }
+
+  returnToTitle() {
+    this.appState = 'TITLE';
+    this.isFinalOmegaStage = false;
+    this.loadStage(0, false);
+    document.getElementById('hangarModal').classList.add('hidden');
+    document.getElementById('topHudControls').classList.add('hidden');
+    document.getElementById('touchActionBar').classList.add('hidden');
+    document.getElementById('titleScreen').classList.remove('hidden');
+  }
+
+  startMission() {
+    document.getElementById('hangarModal').classList.add('hidden');
+    document.getElementById('topHudControls').classList.remove('hidden');
+    document.getElementById('touchActionBar').classList.remove('hidden');
+
+    this.score = 0;
+    this.kills = 0;
+    this.combo = 0;
+    this.isFinalOmegaStage = false;
+    this.player = this.createPlayer();
+    this.loadStage(this.selectedStageIdx, true);
+    this.appState = 'PLAYING';
+  }
+
+  // ==========================================================================
+  // STAGE LOADING & SEAMLESS LINEAR PROGRESSION
+  // ==========================================================================
+  loadStage(idx, showBanner = true, isOmegaFinal = false) {
+    this.isFinalOmegaStage = isOmegaFinal;
+    if (!isOmegaFinal) this.stageIdx = idx;
+    const stage = this.getActiveStageConfig();
+
+    this.cameraX = 0;
+    this.cameraLocked = false;
+    this.currentWaveIdx = 0;
+    this.waveSpawned = false;
+    this.bossSpawned = false;
+
+    this.player.x = 180;
+    this.player.y = (stage.yMin + stage.yMax) * 0.5;
+    this.player.z = 0;
+    this.player.vx = 0;
+    this.player.vy = 0;
+    this.player.vz = 0;
+    this.player.facing = 1;
+    this.player.attackStep = 0;
+    this.player.dashTimer = 0;
+    this.player.grenades = this.player.maxGrenades;
+    this.player.scarfNodes.forEach((n, i) => {
+      n.x = this.player.x - i * 8;
+      n.y = this.player.y - 62;
+    });
+
+    this.enemies = [];
+    this.pickups = [];
+    this.grenades = [];
+    this.projectiles = [];
+    this.slashTrails = [];
+    this.afterimages = [];
+    this.particles = [];
+    this.vents = [];
+
+    // Destructible Street Objects (+5 HP Life & +10 Energy drops)
+    this.props = [];
+    if (!isOmegaFinal) {
+      const propXs = [410, 740, 990, 1440, 1720, 2180];
+      propXs.forEach((px, i) => {
+        const py = stage.yMin + 24 + ((i * 53) % Math.max(30, stage.yMax - stage.yMin - 44));
+        this.props.push({
+          x: px,
+          y: py,
+          type: i % 3 === 0 ? 'crate' : (i % 3 === 1 ? 'locker' : 'barrel'),
+          hp: 20,
+          hurtTimer: 0
+        });
+      });
+    } else {
+      // Two supply pods in Omega Core
+      [340, 1080].forEach((px, i) => {
+        this.props.push({
+          x: px,
+          y: i === 0 ? 490 : 635,
+          type: 'crate',
+          hp: 20,
+          hurtTimer: 0
+        });
+      });
+    }
+
+    // Stage 2 Thermal Vents
+    if (stage.id === 'hot') {
+      [620, 1080, 1540, 1920].forEach((vx, i) => {
+        this.vents.push({
+          x: vx,
+          y: stage.yMin + 35 + ((i * 59) % Math.max(35, stage.yMax - stage.yMin - 70)),
+          timer: (i * 55) % 210,
+          cycle: 210
+        });
+      });
+    }
+
+    if (showBanner) {
+      this.stageBannerTimer = 145;
+      sfx.sfxStageClear();
+    }
+  }
+
+  // ==========================================================================
+  // COMBAT ACTIONS: JUMP, 3-HIT BLADE COMBO, DASH [E], GRENADE [Q], WAVE [L]
+  // ==========================================================================
+  triggerJump() {
+    const p = this.player;
+    if (p.z === 0 && p.dashTimer <= 0) {
+      p.vz = 13.5;
+      this.spawnBurst(p.x, p.y, 0, '#38bdf8', 8);
+    }
+  }
+
+  triggerSlash() {
+    const p = this.player;
+    if (p.dashTimer > 0 || p.hurtTimer > 6) return;
+    if (p.attackStep === 0) {
+      this.startSlashStep(1);
+    } else if (p.attackTimer <= 12 && p.attackStep < 3) {
+      p.comboBuffer = true;
+    }
+  }
+
+  startSlashStep(step) {
+    const p = this.player;
+    const weapon = this.getActiveWeapon();
+    p.attackStep = step;
+    p.attackTimer = step === 3 ? 21 : 15;
+    p.comboBuffer = false;
+    p.hitTargets.clear();
+
+    p.vx = p.facing * (step === 3 ? 8.2 : 4.4);
+    sfx.sfxSlash(step, weapon.id);
+
+    this.slashTrails.push({
+      x: p.x + p.facing * 26,
+      y: p.y,
+      z: p.z + 44,
+      facing: p.facing,
+      step,
+      weaponId: weapon.id,
+      bladeColor: weapon.bladeColor,
+      glowColor: weapon.glowColor,
+      reach: weapon.reach,
+      life: 14,
+      maxLife: 14
+    });
+
+    for (let i = 0; i < 10; i++) {
+      this.particles.push({
+        x: p.x + p.facing * (32 + Math.random() * (weapon.reach * 0.65)),
+        y: p.y + (Math.random() - 0.5) * 26,
+        z: p.z + 24 + Math.random() * 48,
+        vx: p.facing * (2 + Math.random() * 5),
+        vy: (Math.random() - 0.5) * 2,
+        vz: (Math.random() - 0.3) * 3,
+        size: 2.5 + Math.random() * 3,
+        color: i % 2 === 0 ? weapon.glowColor : weapon.coreColor,
+        life: 14 + Math.random() * 8
+      });
+    }
+  }
+
+  // Cyber-Dash [E]: Plays "faaaaaaah" vocal sweep, grants invulnerability, and executes Ground Lurkers!
+  triggerDash() {
+    const p = this.player;
+    if (p.dashTimer > 0 || p.energy < 20) return;
+
+    p.energy -= 20;
+    p.dashTimer = 14;
+    p.invulnTimer = 18;
+    p.attackStep = 0;
+    p.dashHitTargets.clear();
+
+    let dx = 0, dy = 0;
+    if (this.act('left')) dx -= 1;
+    if (this.act('right')) dx += 1;
+    if (this.act('up')) dy -= 1;
+    if (this.act('down')) dy += 1;
+    if (dx === 0 && dy === 0) dx = p.facing;
+    if (dx !== 0) p.facing = Math.sign(dx);
+
+    const len = Math.hypot(dx, dy) || 1;
+    p.vx = (dx / len) * 19.5;
+    p.vy = (dy / len) * 12.0;
+
+    sfx.sfxDashFaaaaah();
+    this.spawnBurst(p.x, p.y, p.z + 28, this.getActiveSuit().trim, 16);
+    this.spawnFloatingText(p.x, p.y - p.z - 88, 'FAAAAAAAH!', '#38bdf8');
+  }
+
+  // Splash Grenade [Q]: 2.0-second fuse countdown with splash radius ring
+  triggerGrenade() {
+    const p = this.player;
+    if (p.grenades <= 0) {
+      this.spawnFloatingText(p.x, p.y - p.z - 75, 'NO GRENADES', '#94a3b8');
+      return;
+    }
+
+    p.grenades--;
+    sfx.sfxGrenadeThrow();
+
+    const aug = this.getActiveAugment();
+    const splashRadius = aug.id === 'plating' ? 168 : 135;
+
+    this.grenades.push({
+      x: p.x + p.facing * 24,
+      y: p.y,
+      z: p.z + 44,
+      vx: p.facing * 8.2,
+      vy: 0,
+      vz: 6.5,
+      fuseFrames: 60, // 1.0 segundo a 60 FPS
+      lastBeepSec: 0,
+      splashRadius,
+      damage: 85
+    });
+  }
+
+  triggerPlasmaWave() {
+    const p = this.player;
+    if (p.energy < 50 || p.dashTimer > 0) return;
+    p.energy -= 50;
+    p.attackStep = 3;
+    p.attackTimer = 18;
+    p.hitTargets.clear();
+
+    const weapon = this.getActiveWeapon();
+    sfx.sfxPlasmaWave();
+    this.triggerShake(6, 10);
+
+    this.projectiles.push({
+      owner: 'player',
+      x: p.x + p.facing * 45,
+      y: p.y,
+      z: p.z + 42,
+      vx: p.facing * 15,
+      damage: 52,
+      radiusX: 46,
+      radiusY: 42,
+      life: 65,
+      color: weapon.glowColor
+    });
+  }
+
+  // ==========================================================================
+  // WAVE & BOSS SPAWNING
+  // ==========================================================================
+  spawnWave(wave) {
+    const stage = this.getActiveStageConfig();
+    this.cameraLocked = true;
+    this.lockTargetX = wave.lockX;
+    this.waveSpawned = true;
+
+    wave.enemies.forEach((type, i) => {
+      const fromRight = i % 2 === 0;
+      const sx = fromRight
+        ? this.lockTargetX + this.W + 55 + i * 70
+        : Math.max(40, this.lockTargetX - 75 - i * 60);
+      const sy = stage.yMin + 22 + ((i * 49) % Math.max(28, stage.yMax - stage.yMin - 40));
+
+      this.enemies.push(this.createEnemy(type, sx, sy, fromRight ? -1 : 1, i));
+    });
+  }
+
+  createEnemy(type, x, y, facing, idx = 0) {
+    if (type === 'lurker') {
+      // Weak Enemy Form 3: GROUND LURKER (5 DMG — DASH [E] ONLY!)
+      return {
+        type: 'lurker',
+        name: 'GROUND LURKER',
+        x, y, z: 0,
+        vx: 0, vy: 0, vz: 0,
+        facing,
+        hp: 40, maxHp: 40,
+        damage: 5,
+        dashOnly: false,
+        fuse: -1,
+        speed: 3.1,
+        aiTimer: 20 + idx * 12,
+        attackTimer: 0,
+        hurtTimer: 0,
+        fallingAbyss: false,
+        walkCycle: idx * 1.3
+      };
+    } else if (type === 'drone') {
+      // Weak Enemy Form 2: WASP DRONE (5 DMG)
+      return {
+        type: 'drone',
+        name: 'WASP DRONE',
+        x, y, z: 76,
+        vx: 0, vy: 0, vz: 0,
+        facing,
+        hp: 45, maxHp: 45,
+        damage: 5,
+        dashOnly: false,
+        speed: 2.5,
+        aiTimer: 50 + idx * 18,
+        aimTimer: 0,
+        hurtTimer: 0,
+        fallingAbyss: false,
+        walkCycle: idx
+      };
+    } else if (type === 'enforcer') {
+      // Medium Enemy: CYBER ENFORCER (12 DMG)
+      return {
+        type: 'enforcer',
+        name: 'CYBER ENFORCER',
+        x, y, z: 0,
+        vx: 0, vy: 0, vz: 0,
+        facing,
+        hp: 105, maxHp: 105,
+        damage: 12,
+        shielded: true,
+        dashOnly: false,
+        speed: 2.0,
+        aiTimer: 35 + idx * 15,
+        attackTimer: 0,
+        hurtTimer: 0,
+        fallingAbyss: false,
+        walkCycle: idx
+      };
+    } else {
+      // Weak Enemy Form 1: STREET STRIKER (5 DMG)
+      return {
+        type: 'striker',
+        name: 'STREET STRIKER',
+        x, y, z: 0,
+        vx: 0, vy: 0, vz: 0,
+        facing,
+        hp: 55, maxHp: 55,
+        damage: 5,
+        dashOnly: false,
+        speed: 2.8,
+        aiTimer: 25 + idx * 14,
+        attackTimer: 0,
+        hurtTimer: 0,
+        fallingAbyss: false,
+        walkCycle: idx
+      };
+    }
+  }
+
+  spawnStageBoss() {
+    const stage = this.getActiveStageConfig();
+    this.cameraLocked = true;
+    this.lockTargetX = Math.max(0, stage.length - this.W);
+    this.bossSpawned = true;
+
+    const b = stage.boss;
+    this.enemies.push({
+      type: 'boss',
+      isOmega: this.isFinalOmegaStage,
+      name: b.name,
+      title: b.title,
+      color: b.color,
+      accent: b.accent,
+      x: this.lockTargetX + this.W - 190,
+      y: (stage.yMin + stage.yMax) * 0.5,
+      z: 0,
+      vx: 0,
+      vy: 0,
+      vz: 0,
+      facing: -1,
+      hp: b.hp,
+      maxHp: b.hp,
+      damage: 15,
+      dashOnly: false,
+      speed: this.isFinalOmegaStage ? 4.3 : 3.3,
+      aiTimer: 32,
+      attackTimer: 0,
+      specialCooldown: 90,
+      hurtTimer: 0,
+      fallingAbyss: false,
+      walkCycle: 0
+    });
+
+    this.spawnFloatingText(this.player.x + 220, stage.yMin - 20, `WARNING: ${b.name}`, '#ef4444');
+    sfx.sfxPlasmaWave();
+  }
+
+  // ==========================================================================
+  // MAIN SIMULATION TICK
+  // ==========================================================================
+  update() {
+    // Always animate ambient skyline/weather & monorail even on Title/Hangar
+    this.updateWeatherAndTransit();
+
+    if (this.appState === 'HANGAR') {
+      this.renderHangarPreview();
+      return;
+    }
+
+    if (this.appState === 'TRANSITION') {
+      this.updateSeamlessTransition();
+      return;
+    }
+
+    if (this.appState !== 'PLAYING') return;
+
+    if (this.hitstopTimer > 0) {
+      this.hitstopTimer--;
+      return;
+    }
+
+    const stage = this.getActiveStageConfig();
+    const p = this.player;
+    const aug = this.getActiveAugment();
+
+    if (this.shakeTimer > 0) this.shakeTimer--;
+    if (this.stageBannerTimer > 0) this.stageBannerTimer--;
+
+    if (this.comboTimer > 0) {
+      this.comboTimer--;
+      if (this.comboTimer === 0) this.combo = 0;
+    }
+    this.comboScale += (1 - this.comboScale) * 0.18;
+
+    // Passive Plasma Energy Recharge
+    const regenRate = aug.id === 'capacitor' ? 0.25 : 0.17;
+    p.energy = Math.min(p.maxEnergy, p.energy + regenRate);
+
+    // Blizzard wind gusts in Stage 04
+    if (stage.id === 'snow') {
+      this.blizzardTimer = (this.blizzardTimer + 1) % 300;
+      this.blizzardActive = this.blizzardTimer > 175;
+    } else {
+      this.blizzardActive = false;
+    }
+
+    // 1. Player Movement & Cyber-Dash [E] Execution
+    if (p.invulnTimer > 0) p.invulnTimer--;
+    if (p.hurtTimer > 0) p.hurtTimer--;
+
+    if (p.dashTimer > 0) {
+      p.dashTimer--;
+      if (p.dashTimer % 2 === 0) {
+        this.afterimages.push({
+          x: p.x,
+          y: p.y,
+          z: p.z,
+          facing: p.facing,
+          color: this.getActiveSuit().trim,
+          alpha: 0.75
+        });
+      }
+      // Check Cyber-Dash [E] collision against Ground Lurkers (and stagger normal foes)
+      this.checkDashCollisions();
+    } else {
+      let mx = 0, my = 0;
+      if (this.act('left')) mx -= 1;
+      if (this.act('right')) mx += 1;
+      if (this.act('up')) my -= 1;
+      if (this.act('down')) my += 1;
+
+      if (p.attackStep === 0 && p.hurtTimer <= 4) {
+        if (mx !== 0 || my !== 0) {
+          const len = Math.hypot(mx, my);
+          p.vx += ((mx / len) * 5.7 - p.vx) * 0.34;
+          p.vy += ((my / len) * 3.9 - p.vy) * 0.34;
+          if (mx !== 0) p.facing = Math.sign(mx);
+          p.walkCycle += 0.24;
+        } else {
+          p.vx *= 0.78;
+          p.vy *= 0.78;
+        }
+      } else {
+        p.vx *= 0.82;
+        p.vy *= 0.82;
+      }
+    }
+
+    const windPush = this.blizzardActive ? stage.windX : 0;
+    p.x += p.vx + windPush;
+    p.y += p.vy;
+
+    if (p.z > 0 || p.vz !== 0) {
+      p.z += p.vz;
+      p.vz -= 0.78;
+      if (p.z <= 0) {
+        p.z = 0;
+        p.vz = 0;
+      }
+    }
+
+    const leftBound = this.cameraX + 42;
+    const rightBound = this.cameraLocked ? (this.cameraX + this.W - 42) : (stage.length - 42);
+    p.x = Math.max(leftBound, Math.min(rightBound, p.x));
+    p.y = Math.max(stage.yMin, Math.min(stage.yMax, p.y));
+
+    this.updateScarf(p);
+
+    // 2. Player Blade Combo Hitbox
+    if (p.attackStep > 0) {
+      p.attackTimer--;
+      if (p.attackTimer >= 5 && p.attackTimer <= 15) {
+        this.checkPlayerSlashHits();
+      }
+      if (p.attackTimer <= 0) {
+        if (p.comboBuffer && p.attackStep < 3) {
+          this.startSlashStep(p.attackStep + 1);
+        } else {
+          p.attackStep = 0;
+        }
+      }
+    }
+
+    // 3. Linear Camera Progression, Waves, Boss Trigger & Seamless Transition
+    if (!this.cameraLocked) {
+      const targetCam = Math.max(this.cameraX, Math.min(stage.length - this.W, p.x - this.W * 0.36));
+      this.cameraX += (targetCam - this.cameraX) * 0.085;
+
+      if (!this.isFinalOmegaStage) {
+        const nextWave = stage.waves[this.currentWaveIdx];
+        if (nextWave && p.x >= nextWave.triggerX && !this.waveSpawned) {
+          this.spawnWave(nextWave);
+        } else if (!nextWave && !this.bossSpawned && p.x >= stage.length - this.W + 220) {
+          this.spawnStageBoss();
+        }
+      } else if (!this.bossSpawned && p.x >= 320) {
+        this.spawnStageBoss();
+      }
+    } else {
+      this.cameraX += (this.lockTargetX - this.cameraX) * 0.12;
+
+      if (this.waveSpawned && this.enemies.length === 0) {
+        this.cameraLocked = false;
+        this.waveSpawned = false;
+        this.currentWaveIdx++;
+        sfx.sfxStageClear();
+        this.spawnFloatingText(p.x, p.y - 95, 'WAVE CLEAR — ADVANCE ►', '#38bdf8');
+      } else if (this.bossSpawned && this.enemies.length === 0) {
+        // Boss Defeated!
+        this.cameraLocked = false;
+        this.bossSpawned = false;
+        sfx.sfxStageClear();
+
+        if (this.isFinalOmegaStage) {
+          this.endGame(true);
+          return;
+        } else {
+          // Trigger Seamless Natural Transition to Next Stage (or Stage 05 Omega Core)
+          this.appState = 'TRANSITION';
+          this.transitionTimer = 95;
+          const nextName = this.stageIdx < STAGE_CARDS.length - 1
+            ? STAGE_CARDS[this.stageIdx + 1].name
+            : FINAL_BOSS_DATA.name;
+          this.spawnFloatingText(p.x, p.y - 105, `BOSS DEFEATED — ENTERING ${nextName}`, '#facc15');
+          return;
+        }
+      }
+    }
+
+    // 4. Update 2.0s Countdown Splash Grenades [Q]
+    for (let i = this.grenades.length - 1; i >= 0; i--) {
+      const g = this.grenades[i];
+      g.fuseFrames--;
+
+      // Arc trajectory until landing on street floor
+      if (g.z > 0 || g.vz > 0) {
+        g.x += g.vx;
+        g.y += g.vy;
+        g.z += g.vz;
+        g.vz -= 0.58;
+        if (g.z <= 0) {
+          g.z = 0;
+          g.vz = 0;
+          g.vx *= 0.25;
+        }
+      } else {
+        g.x += g.vx;
+        g.vx *= 0.85;
+      }
+
+      // Countdown beep at 1.0s
+      if (g.fuseFrames === 40 || g.fuseFrames === 20 || g.fuseFrames === 8) sfx.sfxGrenadeBeep(g.fuseFrames <= 20);
+
+      // Detonate at 0.0s!
+      if (g.fuseFrames <= 0) {
+        this.detonateGrenade(g);
+        this.grenades.splice(i, 1);
+      }
+    }
+
+    // 5. Update Thermal Vents (Stage 02)
+    for (const v of this.vents) {
+      v.timer = (v.timer + 1) % v.cycle;
+      if (v.timer >= 165) {
+        if (Math.random() < 0.6) {
+          this.particles.push({
+            x: v.x + (Math.random() - 0.5) * 32,
+            y: v.y + (Math.random() - 0.5) * 16,
+            z: Math.random() * 20,
+            vx: (Math.random() - 0.5) * 1.4,
+            vy: 0,
+            vz: 5 + Math.random() * 5,
+            size: 5 + Math.random() * 4,
+            color: Math.random() < 0.5 ? '#fb923c' : '#fef08a',
+            life: 16
+          });
+        }
+        if (p.z < 36 && p.invulnTimer <= 0 && Math.abs(p.x - v.x) < 32 && Math.abs(p.y - v.y) < 20) {
+          this.damagePlayer(5, p.x < v.x ? -1 : 1);
+        }
+      }
+    }
+
+    // 6. Update Enemies & Bosses
+    this.updateEnemies(stage, p, windPush);
+
+    // 7. Update Projectiles
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const pr = this.projectiles[i];
+      pr.x += pr.vx || 0;
+      pr.y += pr.vy || 0;
+      pr.life--;
+
+      if (pr.owner === 'player') {
+        for (const en of this.enemies) {
+          if (!en.fallingAbyss && Math.abs(en.x - pr.x) < pr.radiusX && Math.abs(en.y - pr.y) < pr.radiusY) {
+            if (!pr.hitSet) pr.hitSet = new Set();
+            if (!pr.hitSet.has(en)) {
+              pr.hitSet.add(en);
+              if (en.dashOnly) {
+                sfx.sfxArmorClang();
+                this.spawnBurst(en.x, en.y, 16, '#fbbf24', 8);
+                this.spawnFloatingText(en.x, en.y - 46, 'ARMORED! USE DASH [E]', '#fbbf24');
+              } else {
+                this.damageEnemy(en, pr.damage, Math.sign(pr.vx), true);
+              }
+            }
+          }
+        }
+        for (const prop of this.props) {
+          if (Math.abs(prop.x - pr.x) < pr.radiusX && Math.abs(prop.y - pr.y) < pr.radiusY) {
+            this.damageProp(prop, 30);
+          }
+        }
+      } else {
+        if (p.invulnTimer <= 0 && Math.abs(p.x - pr.x) < 25 && Math.abs(p.y - pr.y) < 22 && Math.abs((p.z + 40) - pr.z) < 38) {
+          this.damagePlayer(pr.damage, Math.sign(pr.vx || -1));
+          pr.life = 0;
+        }
+      }
+
+      if (pr.life <= 0) this.projectiles.splice(i, 1);
+    }
+
+    // 8. Update Destructibles, +5 HP / +10 Energy Pickups, Slash Trails & Particles
+    for (const prop of this.props) {
+      if (prop.hurtTimer > 0) prop.hurtTimer--;
+    }
+
+    for (let i = this.pickups.length - 1; i >= 0; i--) {
+      const pk = this.pickups[i];
+      pk.bob += 0.1;
+      // Magnetic pull toward KAI-09 when within 130px
+      const dist = Math.hypot(p.x - pk.x, p.y - pk.y);
+      if (dist < 130) {
+        pk.x += (p.x - pk.x) * 0.12;
+        pk.y += (p.y - pk.y) * 0.12;
+      }
+
+      if (Math.abs(p.x - pk.x) < 42 && Math.abs(p.y - pk.y) < 32 && p.z < 48) {
+        // Every street object drop credits +5 HP (Life) and +10 Energy!
+        p.hp = Math.min(p.maxHp, p.hp + 5);
+        p.energy = Math.min(p.maxEnergy, p.energy + 10);
+        sfx.sfxPickup();
+        this.spawnBurst(pk.x, pk.y, 18, '#4ade80', 12);
+        this.spawnFloatingText(pk.x, pk.y - 46, '+5 LIFE  |  +10 ENERGY', '#4ade80');
+        this.pickups.splice(i, 1);
+      }
+    }
+
+    for (let i = this.slashTrails.length - 1; i >= 0; i--) {
+      this.slashTrails[i].life--;
+      if (this.slashTrails[i].life <= 0) this.slashTrails.splice(i, 1);
+    }
+
+    for (let i = this.afterimages.length - 1; i >= 0; i--) {
+      this.afterimages[i].alpha -= 0.06;
+      if (this.afterimages[i].alpha <= 0) this.afterimages.splice(i, 1);
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const pt = this.particles[i];
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+      pt.z += pt.vz;
+      pt.vz -= 0.25;
+      if (pt.z < 0) { pt.z = 0; pt.vz *= -0.4; }
+      pt.life--;
+      if (pt.life <= 0) this.particles.splice(i, 1);
+    }
+
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      this.floatingTexts[i].y -= 1.05;
+      this.floatingTexts[i].life--;
+      if (this.floatingTexts[i].life <= 0) this.floatingTexts.splice(i, 1);
+    }
+  }
+
+  updateSeamlessTransition() {
+    const p = this.player;
+    this.transitionTimer--;
+    p.x += 5.5;
+    p.walkCycle += 0.25;
+    this.cameraX += 5.5;
+    this.updateScarf(p);
+
+    if (this.transitionTimer <= 0) {
+      if (this.stageIdx < STAGE_CARDS.length - 1) {
+        this.loadStage(this.stageIdx + 1, true, false);
+      } else {
+        // Breach into Stage 05 OMEGA CORE against OMEGA-NEMESIS!
+        this.loadStage(0, true, true);
+      }
+      this.appState = 'PLAYING';
+    }
+  }
+
+  checkDashCollisions() {
+    const p = this.player;
+    const aug = this.getActiveAugment();
+    const dashHitRadius = aug.id === 'plating' ? 68 : 54;
+
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const en = this.enemies[i];
+      if (en.fallingAbyss || p.dashHitTargets.has(en)) continue;
+
+      if (Math.abs(en.x - p.x) < dashHitRadius && Math.abs(en.y - p.y) < 38 && p.z < 42) {
+        p.dashHitTargets.add(en);
+
+        if (en.dashOnly) {
+          // INSTANT DASH EXECUTION OF GROUND LURKER!
+          sfx.sfxHit(true);
+          sfx.sfxCrateBreak();
+          this.hitstopTimer = 4;
+          this.triggerShake(8, 9);
+          this.kills++;
+          this.score += 200;
+          this.combo++;
+          this.comboTimer = 150;
+          this.comboScale = 1.45;
+          p.energy = Math.min(p.maxEnergy, p.energy + 15);
+
+          this.spawnBurst(en.x, en.y, 18, '#fbbf24', 24);
+          this.spawnBurst(en.x, en.y, 26, '#38bdf8', 16);
+          this.spawnFloatingText(en.x, en.y - 68, 'DASH EXECUTE! +200', '#38bdf8');
+          this.enemies.splice(i, 1);
+        } else if (en.type !== 'boss') {
+          // Non-lurker standard enemies get staggered by Cyber-Dash
+          en.vx = p.facing * 9;
+          en.hurtTimer = 8;
+          this.spawnBurst(en.x, en.y, 32, '#38bdf8', 8);
+        }
+      }
+    }
+  }
+
+  detonateGrenade(g) {
+    sfx.sfxGrenadeBoom();
+    this.triggerShake(11, 14);
+    this.spawnBurst(g.x, g.y, 12, '#f97316', 32);
+    this.spawnBurst(g.x, g.y, 24, '#fef08a', 22);
+    this.spawnFloatingText(g.x, g.y - 60, 'SPLASH DETONATION!', '#fbbf24');
+
+    // Damage all enemies in splash radius (even breaks Ground Lurker armor if caught in blast, or heavy damage to all)
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const en = this.enemies[i];
+      if (en.fallingAbyss) continue;
+      const dist = Math.hypot(en.x - g.x, (en.y - g.y) * 1.4);
+      if (dist <= g.splashRadius) {
+        if (en.dashOnly) {
+          this.kills++;
+          this.score += 180;
+          this.spawnFloatingText(en.x, en.y - 65, 'SHATTERED!', '#fbbf24');
+          this.enemies.splice(i, 1);
+        } else {
+          this.damageEnemy(en, g.damage, en.x >= g.x ? 1 : -1, true);
+        }
+      }
+    }
+
+    // Smash nearby street objects
+    for (const prop of this.props) {
+      const dist = Math.hypot(prop.x - g.x, (prop.y - g.y) * 1.4);
+      if (dist <= g.splashRadius) {
+        this.damageProp(prop, 50);
+      }
+    }
+  }
+
+  updateEnemies(stage, p, windPush) {
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const en = this.enemies[i];
+      if (en.hurtTimer > 0) en.hurtTimer--;
+
+      // Sky-Grate Catwalk Abyss Ring-Out
+      if (stage.id === 'thin' && en.type !== 'boss' && (en.y < stage.yMin - 12 || en.y > stage.yMax + 12)) {
+        en.fallingAbyss = true;
+      }
+
+      if (en.fallingAbyss) {
+        en.x += en.vx;
+        en.y += en.vy;
+        en.z -= 7.5;
+        if (en.z < -250) {
+          this.score += 250;
+          this.kills++;
+          this.spawnFloatingText(en.x, stage.yMax, 'ABYSS RING-OUT! +250', '#fbbf24');
+          this.enemies.splice(i, 1);
+        }
+        continue;
+      }
+
+      if (en.type !== 'drone' && (en.z > 0 || en.vz !== 0)) {
+        en.z += en.vz;
+        en.vz -= 0.75;
+        if (en.z <= 0) {
+          en.z = 0;
+          en.vz = 0;
+        }
+      }
+
+      if (en.hurtTimer <= 0) {
+        const dx = p.x - en.x;
+        const dy = p.y - en.y;
+        const dist = Math.hypot(dx, dy);
+        en.facing = dx >= 0 ? 1 : -1;
+
+        if (en.type === 'lurker') {
+          // Ground Lurker: Burrows swiftly beneath the street leaving cracked earth particles, lunges upward to bite (5 DMG)
+          en.walkCycle += 0.35;
+          if (Math.random() < 0.55) {
+            this.particles.push({
+              x: en.x + (Math.random() - 0.5) * 18,
+              y: en.y + (Math.random() - 0.5) * 10,
+              z: 2,
+              vx: (Math.random() - 0.5) * 2,
+              vy: 0,
+              vz: 2 + Math.random() * 2.5,
+              size: 3.5,
+              color: '#94a3b8',
+              life: 14
+            });
+          }
+          if (en.attackTimer > 0) {
+            en.attackTimer--;
+            en.vx *= 0.8;
+            en.vy *= 0.8;
+            if (en.attackTimer === 10 && Math.abs(dx) < 46 && Math.abs(dy) < 26 && p.z < 34) {
+              void 0; /* mordida removida: o Lurker agora explode */
+            }
+          } else if (dist > 44 || Math.abs(dy) > 18) {
+            const len = dist || 1;
+            en.vx = (dx / len) * en.speed;
+            en.vy = (dy / len) * (en.speed * 0.82);
+          } else {
+            en.vx *= 0.5;
+            en.vy *= 0.5;
+            en.aiTimer--;
+            if (en.aiTimer <= 0) {
+              en.attackTimer = 22;
+              en.aiTimer = 46;
+            }
+          }
+        } else if (en.type === 'drone') {
+          // Wasp Drone (5 DMG)
+          en.z = 76 + Math.sin(performance.now() * 0.006 + i) * 7;
+          const desiredX = p.x - en.facing * 255;
+          en.vx = Math.max(-en.speed, Math.min(en.speed, (desiredX - en.x) * 0.04));
+          en.vy = Math.max(-en.speed * 0.8, Math.min(en.speed * 0.8, dy * 0.05));
+
+          if (en.aimTimer > 0) {
+            en.aimTimer--;
+            en.vx *= 0.2;
+            en.vy *= 0.2;
+            if (en.aimTimer === 0) {
+              const angle = Math.atan2(p.y - en.y, p.x - en.x);
+              this.projectiles.push({
+                owner: 'enemy',
+                x: en.x + en.facing * 20,
+                y: en.y,
+                z: en.z - 6,
+                vx: Math.cos(angle) * 8.5,
+                vy: Math.sin(angle) * 5.0,
+                damage: 5,
+                radiusX: 16,
+                radiusY: 16,
+                life: 95,
+                color: '#f43f5e'
+              });
+              sfx.playTone(640, 'sawtooth', 0.11, 0.09, 210);
+            }
+          } else {
+            en.aiTimer--;
+            if (en.aiTimer <= 0 && Math.abs(dx) < 520) {
+              en.aimTimer = 40;
+              en.aiTimer = 110 + Math.random() * 40;
+            }
+          }
+        } else if (en.type === 'boss') {
+          // Aggressive Stage Boss & Stage 05 Final Boss OMEGA-NEMESIS (15 DMG)
+          this.updateBossAI(en, p, dx, dy, dist, stage);
+        } else {
+          // Street Striker (5 DMG) & Cyber Enforcer (12 DMG)
+          if (en.attackTimer > 0) {
+            en.attackTimer--;
+            en.vx *= 0.8;
+            en.vy *= 0.8;
+            if (en.attackTimer === 10) {
+              if (Math.abs(p.x - (en.x + en.facing * 42)) < 46 && Math.abs(p.y - en.y) < 28 && p.z < 42) {
+                this.damagePlayer(en.damage, en.facing);
+              }
+            }
+          } else if (dist > 64 || Math.abs(dy) > 20) {
+            const targetX = p.x - en.facing * 56;
+            const tdx = targetX - en.x;
+            const tlen = Math.hypot(tdx, dy) || 1;
+            en.vx = (tdx / tlen) * en.speed;
+            en.vy = (dy / tlen) * (en.speed * 0.75);
+            en.walkCycle += 0.19;
+          } else {
+            en.vx *= 0.6;
+            en.vy *= 0.6;
+            en.aiTimer--;
+            if (en.aiTimer <= 0) {
+              en.attackTimer = 24;
+              en.aiTimer = en.type === 'enforcer' ? 62 : 45;
+            }
+          }
+        }
+      } else {
+        en.vx *= 0.84;
+        en.vy *= 0.84;
+      }
+
+      en.x += en.vx + (en.type === 'boss' ? 0 : windPush * 0.7);
+      en.y += en.vy;
+
+      if (en.type === 'boss') {
+        en.x = Math.max(this.cameraX + 55, Math.min(this.cameraX + this.W - 55, en.x));
+        en.y = Math.max(stage.yMin, Math.min(stage.yMax, en.y));
+      } else if (stage.id !== 'thin' || en.hurtTimer <= 0) {
+        en.y = Math.max(stage.yMin, Math.min(stage.yMax, en.y));
+      }
+    }
+  }
+
+  updateBossAI(boss, p, dx, dy, dist, stage) {
+    boss.specialCooldown--;
+
+    // Special Ranged / Blitz Attack
+    if (boss.specialCooldown <= 0 && !(boss.windup > 0) && !(boss.attackTimer > 0)) {
+      if (boss.isOmega) {
+        // OMEGA-NEMESIS (Stage 05 Impossible Boss): Hyper-blink behind player + 5-orb radial plasma barrage!
+        boss.x = Math.max(this.cameraX + 80, Math.min(this.cameraX + this.W - 80, p.x - p.facing * 120));
+        boss.y = p.y;
+        this.spawnBurst(boss.x, boss.y, 45, '#ef4444', 24);
+        sfx.sfxPlasmaWave();
+
+        for (let a = -2; a <= 2; a++) {
+          const baseAng = Math.atan2(p.y - boss.y, p.x - boss.x) + a * 0.24;
+          this.projectiles.push({
+            owner: 'enemy',
+            x: boss.x + boss.facing * 30,
+            y: boss.y,
+            z: 44,
+            vx: Math.cos(baseAng) * 10.5,
+            vy: Math.sin(baseAng) * 6.5,
+            damage: 15,
+            radiusX: 20,
+            radiusY: 20,
+            life: 110,
+            color: '#ef4444'
+          });
+        }
+        boss.specialCooldown = 78;
+      } else {
+        // Stage 01-04 Bosses: High-speed shockwave projectile
+        const ang = Math.atan2(p.y - boss.y, p.x - boss.x);
+        this.projectiles.push({
+          owner: 'enemy',
+          x: boss.x + boss.facing * 35,
+          y: boss.y,
+          z: 40,
+          vx: Math.cos(ang) * 9.5,
+          vy: Math.sin(ang) * 5.5,
+          damage: 15,
+          radiusX: 20,
+          radiusY: 20,
+          life: 100,
+          color: boss.color
+        });
+        sfx.sfxPlasmaWave();
+        boss.specialCooldown = 105;
+      }
+    }
+
+    // Combate fluido: telegrafo (windup) -> investida -> recuperação vulnerável
+    if (boss.windup > 0) {
+      boss.windup--;
+      boss.vx *= 0.6; boss.vy *= 0.6;
+      if (boss.windup > 6) boss.facing = dx >= 0 ? 1 : -1;
+      if (boss.windup === 0) { boss.attackTimer = 14; boss.lungeHit = false; sfx.playTone(180, 'sawtooth', 0.12, 0.08, 90); }
+    } else if (boss.attackTimer > 0) {
+      boss.attackTimer--;
+      boss.vx = boss.facing * (boss.isOmega ? 8.6 : 6.2);
+      boss.vy *= 0.8;
+      if (!boss.lungeHit && Math.abs(p.x - (boss.x + boss.facing * 50)) < 66 && Math.abs(p.y - boss.y) < 36 && p.z < 48) {
+        boss.lungeHit = true;
+        this.damagePlayer(15, boss.facing);
+      }
+      if (boss.attackTimer === 0) boss.recover = boss.isOmega ? 14 : 20;
+    } else if (boss.recover > 0) {
+      boss.recover--;
+      boss.vx *= 0.7; boss.vy *= 0.7;
+    } else if (dist > 78 || Math.abs(dy) > 22) {
+      const targetX = p.x - boss.facing * 68;
+      const tdx = targetX - boss.x;
+      const tlen = Math.hypot(tdx, dy) || 1;
+      boss.vx += ((tdx / tlen) * boss.speed - boss.vx) * 0.25;
+      boss.vy += ((dy / tlen) * (boss.speed * 0.8) - boss.vy) * 0.25;
+      boss.walkCycle += 0.22;
+    } else {
+      boss.vx *= 0.5;
+      boss.vy *= 0.5;
+      boss.aiTimer--;
+      if (boss.aiTimer <= 0) {
+        boss.windup = boss.isOmega ? 14 : 18;
+        boss.aiTimer = boss.isOmega ? 16 : 26;
+      }
+    }
+  }
+
+  checkPlayerSlashHits() {
+    const p = this.player;
+    const weapon = this.getActiveWeapon();
+    const aug = this.getActiveAugment();
+    const step = p.attackStep;
+
+    const reachX = step === 3 ? weapon.reach + 22 : weapon.reach;
+    const reachY = step === 3 ? 52 : 34;
+    const mult = (aug.id === 'edge' ? 1.2 : 1.0) * (step === 3 ? 1.55 : (step === 2 ? 1.2 : 1.0));
+    const dmg = Math.round(weapon.damage * mult);
+
+    for (const en of this.enemies) {
+      if (en.fallingAbyss || p.hitTargets.has(en)) continue;
+      const dx = en.x - p.x;
+      const inFront = step === 3 ? Math.abs(dx) < reachX : (dx * p.facing > -18 && Math.abs(dx) < reachX);
+      const inLane = Math.abs(en.y - p.y) < reachY;
+      const inHeight = Math.abs((en.z + 35) - (p.z + 42)) < 58;
+
+      if (inFront && inLane && inHeight) {
+        p.hitTargets.add(en);
+
+        // Ground Lurker is IMMUNE to normal sword slashes — must use Cyber-Dash [E]!
+        if (en.dashOnly) {
+          sfx.sfxArmorClang();
+          this.spawnBurst(en.x, en.y, 16, '#fbbf24', 10);
+          this.spawnFloatingText(en.x, en.y - 48, 'IMMUNE! USE DASH [E]', '#fbbf24');
+          continue;
+        }
+
+        this.damageEnemy(en, dmg, p.facing, step === 3);
+      }
+    }
+
+    for (const prop of this.props) {
+      if (p.hitTargets.has(prop)) continue;
+      const dx = prop.x - p.x;
+      const inFront = step === 3 ? Math.abs(dx) < reachX : (dx * p.facing > -15 && Math.abs(dx) < reachX);
+      if (inFront && Math.abs(prop.y - p.y) < reachY && p.z < 50) {
+        p.hitTargets.add(prop);
+        this.damageProp(prop, dmg);
+      }
+    }
+  }
+
+  damageEnemy(en, amount, dir, heavy = false) {
+    const stage = this.getActiveStageConfig();
+    const aug = this.getActiveAugment();
+
+    if (en.shielded && dir !== en.facing && !heavy) {
+      en.shielded = false;
+      en.vx = dir * 6;
+      en.hurtTimer = 10;
+      sfx.sfxArmorClang();
+      this.spawnBurst(en.x - en.facing * 20, en.y, en.z + 42, '#38bdf8', 14);
+      this.spawnFloatingText(en.x, en.y - en.z - 80, 'SHIELD BROKEN!', '#38bdf8');
+      return;
+    }
+
+    en.hp -= amount;
+    en.hurtTimer = en.type === 'boss' ? 6 : (heavy ? 18 : 11);
+    if (en.type !== 'boss') {
+      en.vx = dir * (heavy ? 12.0 : 5.0);
+      if (stage.id === 'thin' && heavy) {
+        const midY = (stage.yMin + stage.yMax) * 0.5;
+        en.vy = (en.y >= midY ? 1 : -1) * 7.5;
+      }
+      if (heavy && en.type !== 'drone') en.vz = 6.2;
+    }
+
+    this.combo++;
+    this.comboTimer = 150;
+    this.comboScale = 1.42;
+    this.score += amount * (1 + Math.floor(this.combo / 5));
+    const energyGain = aug.id === 'capacitor' ? 11 : 8;
+    this.player.energy = Math.min(this.player.maxEnergy, this.player.energy + energyGain);
+
+    sfx.sfxHit(heavy);
+    this.hitstopTimer = heavy ? 3 : 1;
+    this.triggerShake(heavy ? 7 : 4, heavy ? 8 : 4);
+
+    this.spawnBurst(en.x, en.y, en.z + 40, heavy ? '#f59e0b' : '#38bdf8', heavy ? 16 : 9);
+    this.spawnFloatingText(en.x, en.y - en.z - 75, `-${amount}`, heavy ? '#fbbf24' : '#ffffff');
+
+    if (en.hp <= 0) {
+      this.kills++;
+      this.score += en.type === 'boss' ? 2500 : 150;
+      this.spawnBurst(en.x, en.y, en.z + 35, '#fb923c', 26);
+      const idx = this.enemies.indexOf(en);
+      if (idx !== -1) this.enemies.splice(idx, 1);
+    }
+  }
+
+  damageProp(prop, amount) {
+    prop.hp -= amount;
+    prop.hurtTimer = 8;
+    sfx.sfxHit(false);
+    this.spawnBurst(prop.x, prop.y, 26, '#38bdf8', 10);
+
+    if (prop.hp <= 0) {
+      sfx.sfxCrateBreak();
+      this.triggerShake(5, 6);
+      this.score += 75;
+      this.spawnBurst(prop.x, prop.y, 24, '#38bdf8', 22);
+
+      // Spawn magnetic supply orb (+5 HP Life & +10 Energy)
+      this.pickups.push({
+        x: prop.x,
+        y: prop.y,
+        bob: 0
+      });
+
+      const idx = this.props.indexOf(prop);
+      if (idx !== -1) this.props.splice(idx, 1);
+    }
+  }
+
+  damagePlayer(amount, dir) {
+    const p = this.player;
+    if (p.invulnTimer > 0) return;
+    p.hp = Math.max(0, p.hp - amount);
+    p.invulnTimer = 42;
+    p.hurtTimer = 14;
+    p.vx = dir * 7.2;
+    p.attackStep = 0;
+
+    sfx.sfxHit(true);
+    this.triggerShake(9, 10);
+    this.spawnBurst(p.x, p.y, p.z + 42, '#ef4444', 16);
+    this.spawnFloatingText(p.x, p.y - p.z - 82, `-${amount} LIFE`, '#ef4444');
+
+    if (p.hp <= 0) {
+      this.endGame(false);
+    }
+  }
+
+  updateScarf(p) {
+    const anchorX = p.x - p.facing * 8;
+    const anchorY = p.y - p.z - 64;
+    p.scarfNodes[0].x = anchorX;
+    p.scarfNodes[0].y = anchorY;
+
+    const t = performance.now() * 0.008;
+    for (let i = 1; i < p.scarfNodes.length; i++) {
+      const prev = p.scarfNodes[i - 1];
+      const cur = p.scarfNodes[i];
+      const flutter = Math.sin(t + i * 0.9) * 2.3;
+      const targetX = prev.x - p.facing * 8.5 + (this.blizzardActive ? -4 : 0);
+      const targetY = prev.y + 1.4 + flutter;
+      cur.x += (targetX - cur.x) * 0.42;
+      cur.y += (targetY - cur.y) * 0.42;
+    }
+  }
+
+  updateWeatherAndTransit() {
+    const stage = this.getActiveStageConfig();
+    for (const wp of this.weatherParticles) {
+      if (stage.id === 'cool') {
+        wp.x -= 2.4;
+        wp.y += wp.speed * 1.4;
+      } else if (stage.id === 'hot') {
+        wp.x += Math.sin(performance.now() * 0.003 + wp.y) * 0.8;
+        wp.y -= wp.speed * 0.35;
+      } else if (stage.id === 'snow') {
+        wp.x -= this.blizzardActive ? 11.0 : 3.5;
+        wp.y += wp.speed * 0.55;
+      } else {
+        wp.x -= 1.0;
+        wp.y += 1.4;
+      }
+      if (wp.y > this.H) { wp.y = -10; wp.x = Math.random() * this.W; }
+      if (wp.y < -15) { wp.y = this.H + 5; wp.x = Math.random() * this.W; }
+      if (wp.x < -20) wp.x = this.W + 10;
+      if (wp.x > this.W + 20) wp.x = -10;
+    }
+
+    // Elevated Maglev Monorail in Stage 01 Plaza
+    this.monorail.x += this.monorail.speed;
+    if (this.monorail.x > this.W + 520) {
+      this.monorail.x = -520;
+    }
+  }
+
+  spawnBurst(x, y, z, color, count) {
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x, y, z,
+        vx: (Math.random() - 0.5) * 9,
+        vy: (Math.random() - 0.5) * 5,
+        vz: 1.5 + Math.random() * 6,
+        size: 2.5 + Math.random() * 4,
+        color,
+        life: 16 + Math.random() * 14
+      });
+    }
+  }
+
+  spawnFloatingText(x, y, text, color) {
+    this.floatingTexts.push({ x, y, text, color, life: 48 });
+  }
+
+  triggerShake(intensity, duration) {
+    if (!this.shakeEnabled) return;
+    this.shakeIntensity = intensity;
+    this.shakeTimer = duration;
+  }
+
+  endGame(victory) {
+    this.appState = 'ENDED';
+    document.getElementById('touchActionBar').classList.add('hidden');
+    const modal = document.getElementById('endModal');
+    const sub = document.getElementById('endSubtitle');
+    const title = document.getElementById('endTitle');
+    const stats = document.getElementById('endStats');
+
+    modal.classList.remove('hidden');
+    if (victory) {
+      sfx.sfxStageClear();
+      sub.textContent = 'IMPOSSIBLE FEAT ACHIEVED // OMEGA-NEMESIS DESTROYED';
+      sub.className = 'text-xs font-bold tracking-widest text-amber-300 mb-1';
+      title.textContent = 'NEO-STREETS LIBERATED';
+    } else {
+      sub.textContent = 'LIFE LINE DEPLETED (0 / 50 HP)';
+      sub.className = 'text-xs font-bold tracking-widest text-rose-400 mb-1';
+      title.textContent = 'UNIT KAI-09 OFFLINE';
+    }
+    stats.textContent = `SCORE: ${this.score.toLocaleString()}   |   HOSTILES NEUTRALIZED: ${this.kills}`;
+  }
+
+  // ==========================================================================
+  // 2.5D RENDERING PIPELINE
+  // ==========================================================================
+  render() {
+    const ctx = this.ctx;
+    ctx.save();
+
+    if (this.shakeTimer > 0 && this.shakeEnabled) {
+      ctx.translate((Math.random() - 0.5) * this.shakeIntensity, (Math.random() - 0.5) * this.shakeIntensity);
+    }
+
+    this.drawStageBackground(ctx);
+    this.drawWalkableFloor(ctx);
+    this.drawThermalVents(ctx);
+    this.drawGrenadeGroundIndicators(ctx);
+
+    const renderList = [];
+    for (const prop of this.props) renderList.push({ y: prop.y, fn: () => this.drawProp(ctx, prop) });
+    for (const pk of this.pickups) renderList.push({ y: pk.y, fn: () => this.drawPickup(ctx, pk) });
+    for (const af of this.afterimages) renderList.push({ y: af.y - 0.5, fn: () => this.drawAfterimage(ctx, af) });
+    for (const en of this.enemies) renderList.push({ y: en.y, fn: () => this.drawEnemy(ctx, en) });
+    renderList.push({ y: this.player.y, fn: () => this.drawPlayer(ctx, this.player) });
+    for (const g of this.grenades) renderList.push({ y: g.y, fn: () => this.drawGrenade(ctx, g) });
+    for (const pr of this.projectiles) renderList.push({ y: pr.y, fn: () => this.drawProjectile(ctx, pr) });
+
+    renderList.sort((a, b) => a.y - b.y);
+    for (const item of renderList) item.fn();
+
+    this.drawSlashTrails(ctx);
+    this.drawParticles(ctx);
+    this.drawWeatherOverlay(ctx);
+    this.drawFloatingTexts(ctx);
+
+    if (this.appState === 'PLAYING' || this.appState === 'TRANSITION') {
+      this.drawTacticalHUD(ctx);
+    }
+
+    ctx.restore();
+  }
+
+  drawStageBackground(ctx) {
+    const stage = this.getActiveStageConfig();
+
+    const sky = ctx.createLinearGradient(0, 0, 0, stage.yMin);
+    sky.addColorStop(0, stage.skyTop);
+    sky.addColorStop(0.55, stage.skyMid);
+    sky.addColorStop(1, stage.skyBot);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, this.W, stage.yMin + 10);
+
+    // Distant Skyline Skyscrapers
+    const pFar = this.cameraX * 0.2;
+    for (let i = -1; i < 16; i++) {
+      const bx = i * 115 - (pFar % 115);
+      const bh = 135 + ((Math.abs(i * 47 + this.stageIdx * 19)) % 150);
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(bx, stage.yMin - bh, 96, bh);
+
+      ctx.fillStyle = stage.id === 'hot' ? 'rgba(251, 146, 60, 0.16)' : (stage.id === 'omega' ? 'rgba(239, 68, 68, 0.18)' : 'rgba(56, 189, 248, 0.16)');
+      for (let wy = stage.yMin - bh + 18; wy < stage.yMin - 24; wy += 24) {
+        ctx.fillRect(bx + 14, wy, 18, 6);
+        ctx.fillRect(bx + 54, wy, 18, 6);
+      }
+    }
+
+    const pMid = this.cameraX * 0.62;
+
+    if (stage.id === 'cool') {
+      // REDESIGNED STAGE 01: NEO-STREETS // SECTOR 01 TRANSIT PLAZA
+      // 1. Elevated Maglev Sky-Bridge & Animated Monorail Train
+      ctx.fillStyle = '#141a24';
+      ctx.fillRect(0, 178, this.W, 18);
+      ctx.fillStyle = '#2b3544';
+      ctx.fillRect(0, 176, this.W, 3);
+
+      // Sky-bridge support pylons
+      for (let i = -1; i < 6; i++) {
+        const px = i * 320 - ((this.cameraX * 0.35) % 320);
+        ctx.fillStyle = '#111620';
+        ctx.fillRect(px, 196, 26, stage.yMin - 196);
+      }
+
+      // Sleek Animated Monorail Train gliding across sky-bridge
+      const tx = this.monorail.x;
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(tx, 148, 360, 28);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(tx, 168, 360, 4);
+      // Passenger windows
+      ctx.fillStyle = '#e0f2fe';
+      for (let wx = tx + 24; wx < tx + 330; wx += 34) {
+        ctx.fillRect(wx, 154, 22, 9);
+      }
+      // Headlight beam
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(tx + 354, 158, 6, 8);
+
+      // 2. Transit Plaza Architecture, Sector Billboards & Steam Vents
+      for (let i = -1; i < 8; i++) {
+        const sx = i * 280 - (pMid % 280);
+        ctx.fillStyle = '#0f141d';
+        ctx.fillRect(sx + 10, 218, 250, stage.yMin - 218);
+        ctx.strokeStyle = '#242f40';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(sx + 10, 218, 250, stage.yMin - 218);
+
+        // Clean Matte-Tactical Transit Signboard
+        ctx.fillStyle = '#141a22';
+        ctx.fillRect(sx + 28, 238, 170, 32);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(sx + 28, 238, 170, 32);
+
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(i % 2 === 0 ? 'SECTOR 01 // PLAZA' : 'MAGLEV TRANSIT HUB', sx + 113, 258);
+
+        // Plaza Roll-up Gate
+        ctx.fillStyle = '#18202c';
+        ctx.fillRect(sx + 32, stage.yMin - 125, 130, 125);
+        ctx.fillStyle = '#0e1116';
+        for (let gy = stage.yMin - 116; gy < stage.yMin; gy += 12) {
+          ctx.fillRect(sx + 32, gy, 130, 2);
+        }
+
+        // Architectural Pillar
+        ctx.fillStyle = '#1e2736';
+        ctx.fillRect(sx + 215, 218, 32, stage.yMin - 218);
+      }
+    } else if (stage.id === 'hot') {
+      // STAGE 02: MAGMA FOUNDRY
+      for (let i = -1; i < 8; i++) {
+        const fx = i * 280 - (pMid % 280);
+        ctx.fillStyle = '#1c110d';
+        ctx.fillRect(fx + 20, 90, 190, stage.yMin - 90);
+        ctx.fillStyle = '#ea580c';
+        ctx.fillRect(fx + 56, 170, 118, 70);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(fx + 74, 185, 82, 42);
+        ctx.fillStyle = '#fb923c';
+        ctx.fillRect(fx + 104, 240, 22, stage.yMin - 240);
+      }
+    } else if (stage.id === 'thin') {
+      // STAGE 03: SKY-GRATE CATWALK
+      const blink = Math.floor(performance.now() / 420) % 2 === 0;
+      for (let i = -1; i < 8; i++) {
+        const tx = i * 260 - (pMid % 260);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(tx + 95, 130, 16, stage.yMin - 130);
+        ctx.fillStyle = blink ? '#ef4444' : '#7f1d1d';
+        ctx.beginPath();
+        ctx.arc(tx + 103, 126, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (stage.id === 'snow') {
+      // STAGE 04: CRYO-SECTOR OUTPOST
+      for (let i = -1; i < 9; i++) {
+        const sx = i * 230 - (pMid % 230);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(sx + 18, 125, 175, stage.yMin - 125);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(sx + 12, 118, 188, 12);
+        ctx.fillStyle = '#bae6fd';
+        for (let ic = 24; ic < 180; ic += 26) {
+          ctx.beginPath();
+          ctx.moveTo(sx + ic, 130);
+          ctx.lineTo(sx + ic + 8, 130);
+          ctx.lineTo(sx + ic + 4, 152);
+          ctx.fill();
+        }
+      }
+    } else if (stage.id === 'omega') {
+      // STAGE 05: OMEGA CORE REACTOR
+      for (let i = -1; i < 7; i++) {
+        const ox = i * 260 - (pMid % 260);
+        ctx.fillStyle = '#180d1e';
+        ctx.fillRect(ox + 20, 80, 210, stage.yMin - 80);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(ox + 50, 140, 150, 180);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+        ctx.fillRect(ox + 50, 140, 150, 180);
+      }
+    }
+  }
+
+  drawWalkableFloor(ctx) {
+    const stage = this.getActiveStageConfig();
+
+    if (stage.id === 'thin') {
+      ctx.fillStyle = '#060911';
+      ctx.fillRect(0, stage.yMin - 65, this.W, this.H - (stage.yMin - 65));
+
+      const deckH = stage.yMax - stage.yMin;
+      ctx.fillStyle = '#1a2230';
+      ctx.fillRect(0, stage.yMin, this.W, deckH);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, stage.yMin - 6, this.W, 6);
+      ctx.fillRect(0, stage.yMax, this.W, 8);
+      return;
+    }
+
+    ctx.fillStyle = stage.floorBase;
+    ctx.fillRect(0, stage.yMin, this.W, this.H - stage.yMin);
+
+    ctx.fillStyle = stage.floorLine;
+    ctx.fillRect(0, stage.yMin - 8, this.W, 10);
+
+    // Stage 01 Plaza Asphalt Reflections & Street Curb Markings
+    if (stage.id === 'cool') {
+      for (let i = -1; i < 14; i++) {
+        const px = i * 200 - (this.cameraX % 200);
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+        ctx.beginPath();
+        ctx.ellipse(px + 95, 555 + (i % 3) * 34, 72, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tactical Yellow/White Plaza Lane Markers
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(px + 30, stage.yMin + 4, 48, 4);
+      }
+    }
+
+    const scrollOff = this.cameraX % 95;
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
+    ctx.lineWidth = 1.5;
+    for (let gx = -scrollOff; gx < this.W; gx += 95) {
+      ctx.beginPath();
+      ctx.moveTo(gx, stage.yMin);
+      ctx.lineTo(gx - 52, this.H);
+      ctx.stroke();
+    }
+  }
+
+  drawThermalVents(ctx) {
+    for (const v of this.vents) {
+      const sx = v.x - this.cameraX;
+      if (sx < -80 || sx > this.W + 80) continue;
+      const isWarning = v.timer >= 115 && v.timer < 165;
+      const isErupting = v.timer >= 165;
+
+      ctx.save();
+      ctx.fillStyle = '#090707';
+      ctx.beginPath();
+      ctx.ellipse(sx, v.y, 32, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = isErupting ? '#fef08a' : (isWarning ? '#f97316' : '#7c2d12');
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      if (isErupting) {
+        const grad = ctx.createLinearGradient(sx, v.y, sx, v.y - 165);
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.5, '#f97316');
+        grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(sx - 22, v.y - 165, 44, 165);
+      }
+      ctx.restore();
+    }
+  }
+
+  // ==========================================================================
+  // HIGHLY VISUAL WEAPON + PROTAGONIST RENDERING
+  // ==========================================================================
+  drawPlayer(ctx, p) {
+    const sx = p.x - this.cameraX;
+    const sy = p.y;
+    const bodyY = sy - p.z;
+    const suit = this.getActiveSuit();
+    const weapon = this.getActiveWeapon();
+
+    if (p.invulnTimer > 0 && Math.floor(p.invulnTimer / 3) % 2 === 0) {
+      ctx.globalAlpha = 0.55;
+    }
+
+    // Contact Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.52)';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 28, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Flowing Cloth Scarf
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (let i = 0; i < p.scarfNodes.length - 1; i++) {
+      const n1 = p.scarfNodes[i];
+      const n2 = p.scarfNodes[i + 1];
+      ctx.lineWidth = Math.max(2, 10 - i * 1.1);
+      ctx.strokeStyle = i % 2 === 0 ? suit.scarfMain : suit.scarfAlt;
+      ctx.beginPath();
+      ctx.moveTo(n1.x - this.cameraX, n1.y);
+      ctx.lineTo(n2.x - this.cameraX, n2.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(sx, bodyY);
+    ctx.scale(p.facing, 1);
+
+    const stride = p.z > 0 ? 10 : Math.sin(p.walkCycle) * 11;
+    let swordAngle = -0.32;
+    if (p.attackStep === 1) swordAngle = 0.38;
+    else if (p.attackStep === 2) swordAngle = -1.18;
+    else if (p.attackStep === 3) swordAngle = p.attackTimer * 0.55;
+
+    this.drawCharacterRig(ctx, suit, weapon, stride, 0, swordAngle);
+
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
+  drawCharacterRig(ctx, suit, weapon, stride, breatheY, swordAngle) {
+    // If Spectre Twin Blades is equipped, draw the OFF-HAND reverse-grip blade behind the torso!
+    if (weapon.id === 'twin') {
+      ctx.save();
+      ctx.translate(-8, -50 + breatheY);
+      ctx.rotate(-swordAngle - 0.55);
+      this.drawWeaponGeometry(ctx, weapon, true);
+      ctx.restore();
+    }
+
+    // Legs
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-10 - stride * 0.5, -34, 9, 34);
+    ctx.fillRect(3 + stride * 0.5, -34, 9, 34);
+    ctx.fillStyle = suit.trim;
+    ctx.fillRect(-7 - stride * 0.5, -20, 4, 4);
+    ctx.fillRect(6 + stride * 0.5, -20, 4, 4);
+
+    // Armored Exosuit Torso
+    ctx.fillStyle = suit.primary;
+    ctx.beginPath();
+    ctx.moveTo(-14, -66 + breatheY);
+    ctx.lineTo(14, -66 + breatheY);
+    ctx.lineTo(10, -32);
+    ctx.lineTo(-10, -32);
+    ctx.closePath();
+    ctx.fill();
+
+    // Chest Core & Trim
+    ctx.fillStyle = suit.trim;
+    ctx.fillRect(2, -57 + breatheY, 7, 10);
+    ctx.fillStyle = suit.scarfMain;
+    ctx.fillRect(-15, -69 + breatheY, 30, 8);
+
+    // Head & Visor
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-11, -88 + breatheY, 22, 20);
+    ctx.fillStyle = '#334155';
+    ctx.beginPath();
+    ctx.moveTo(-13, -86 + breatheY);
+    ctx.lineTo(-6, -96 + breatheY);
+    ctx.lineTo(2, -88 + breatheY);
+    ctx.lineTo(9, -95 + breatheY);
+    ctx.lineTo(13, -84 + breatheY);
+    ctx.fill();
+
+    ctx.fillStyle = suit.visor;
+    ctx.fillRect(1, -82 + breatheY, 12, 5);
+
+    // Main Weapon Arm & Distinct Weapon Silhouette
+    ctx.save();
+    ctx.translate(6, -54 + breatheY);
+    ctx.rotate(swordAngle);
+    this.drawWeaponGeometry(ctx, weapon, false);
+    ctx.restore();
+  }
+
+  drawWeaponGeometry(ctx, weapon, isOffHand) {
+    if (weapon.id === 'katana') {
+      // 1. MK-IV PLASMA KATANA: Sleek curved blade + tsuba guard + glowing white/cyan core
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-8, -2.5, 20, 5);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(11, -7, 4, 14);
+
+      ctx.shadowColor = weapon.glowColor;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = weapon.bladeColor;
+      ctx.beginPath();
+      ctx.moveTo(15, -4);
+      ctx.quadraticCurveTo(54, -5, 86, -9);
+      ctx.lineTo(78, 3);
+      ctx.quadraticCurveTo(46, 4, 15, 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = weapon.coreColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(17, -1);
+      ctx.quadraticCurveTo(50, -2, 81, -6);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else if (weapon.id === 'claymore') {
+      // 2. VULCAN CLAYMORE: Massive heavy industrial magma greatsword with serrated teeth & molten core
+      ctx.fillStyle = '#27272a';
+      ctx.fillRect(-10, -4, 24, 8);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(12, -11, 7, 22);
+
+      ctx.shadowColor = weapon.glowColor;
+      ctx.shadowBlur = 16;
+      // Wide heavy iron outer bevel
+      ctx.fillStyle = '#3f3f46';
+      ctx.beginPath();
+      ctx.moveTo(19, -10);
+      ctx.lineTo(94, -8);
+      ctx.lineTo(106, 0);
+      ctx.lineTo(94, 8);
+      ctx.lineTo(19, 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glowing molten magma inner core
+      ctx.fillStyle = weapon.bladeColor;
+      ctx.fillRect(22, -5, 72, 10);
+      ctx.fillStyle = weapon.coreColor;
+      ctx.fillRect(25, -2, 64, 4);
+      ctx.shadowBlur = 0;
+    } else if (weapon.id === 'twin') {
+      // 3. SPECTRE TWIN BLADES: Dual violet-magenta energy daggers/short-blades
+      const len = isOffHand ? 46 : 54;
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-6, -2.5, 16, 5);
+      ctx.fillStyle = '#e879f9';
+      ctx.fillRect(9, -6, 3, 12);
+
+      ctx.shadowColor = weapon.glowColor;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = weapon.bladeColor;
+      ctx.beginPath();
+      ctx.moveTo(12, -5);
+      ctx.lineTo(12 + len, 0);
+      ctx.lineTo(12, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = weapon.coreColor;
+      ctx.fillRect(14, -1.5, len * 0.72, 3);
+      ctx.shadowBlur = 0;
+    } else if (weapon.id === 'glaive') {
+      // 4. CRYO-ARC GLAIVE: Long two-handed polearm shaft with twin crescent frost-cyan halberd blades
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-26, -2.5, 102, 5);
+      ctx.fillStyle = '#bae6fd';
+      ctx.fillRect(-28, -4, 6, 8);
+
+      ctx.shadowColor = weapon.glowColor;
+      ctx.shadowBlur = 15;
+      // Crescent Halberd Axe-Head
+      ctx.fillStyle = weapon.bladeColor;
+      ctx.beginPath();
+      ctx.moveTo(68, -3);
+      ctx.quadraticCurveTo(86, -22, 106, -12);
+      ctx.lineTo(116, 0);
+      ctx.lineTo(106, 12);
+      ctx.quadraticCurveTo(86, 22, 68, 3);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = weapon.coreColor;
+      ctx.beginPath();
+      ctx.moveTo(74, -2);
+      ctx.lineTo(110, 0);
+      ctx.lineTo(74, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  drawAfterimage(ctx, af) {
+    const sx = af.x - this.cameraX;
+    const bodyY = af.y - af.z;
+    ctx.save();
+    ctx.globalAlpha = af.alpha * 0.55;
+    ctx.translate(sx, bodyY);
+    ctx.scale(af.facing, 1);
+    ctx.fillStyle = af.color || '#38bdf8';
+    ctx.fillRect(-12, -86, 24, 86);
+    ctx.restore();
+  }
+
+  // ==========================================================================
+  // DISTINCT ENEMY FORMS (STRIKER, WASP DRONE, GROUND LURKER, ENFORCER, BOSS)
+  // ==========================================================================
+  drawEnemy(ctx, en) {
+    const sx = en.x - this.cameraX;
+    if (sx < -120 || sx > this.W + 120) return;
+
+    const sy = en.y;
+    const bodyY = sy - en.z;
+
+    // Ground Contact Shadow
+    if (!en.fallingAbyss && en.type !== 'lurker') {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.48)';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, en.type === 'boss' ? 42 : (en.type === 'enforcer' ? 30 : 22), 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.save();
+    ctx.translate(sx, bodyY);
+    if (en.fallingAbyss) {
+      ctx.rotate(en.z * 0.03);
+      ctx.scale(Math.max(0.2, 1 + en.z / 300), Math.max(0.2, 1 + en.z / 300));
+    } else {
+      ctx.scale(en.facing, 1);
+    }
+
+    const flash = en.hurtTimer > 0 && en.hurtTimer % 2 === 0;
+
+    if (en.type === 'lurker') {
+      // WEAK ENEMY FORM 3: GROUND LURKER (Subterranean Armored Dorsal Saw-Fin — DASH [E] ONLY)
+      // Cracked pavement mound
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.ellipse(0, 2, 34, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Protruding serrated dark-titanium dorsal fin
+      const bob = Math.sin(en.walkCycle) * 3;
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-22, 0);
+      ctx.quadraticCurveTo(-4, -30 + bob, 20, -14 + bob);
+      ctx.lineTo(26, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Glowing amber eye-slit on fin
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(6, -11 + bob, 10, 4);
+    } else if (en.type === 'drone') {
+      // WEAK ENEMY FORM 2: WASP DRONE (Twin-Rotor VTOL + Red Mono-Eye + Underside Stinger)
+      ctx.fillStyle = flash ? '#ffffff' : '#1e293b';
+      ctx.beginPath();
+      ctx.moveTo(-26, -4);
+      ctx.lineTo(10, -14);
+      ctx.lineTo(26, 0);
+      ctx.lineTo(8, 12);
+      ctx.lineTo(-22, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Twin VTOL Rotors
+      const rw = 16 + Math.sin(performance.now() * 0.06) * 10;
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-24 - rw * 0.5, -16, rw, 3);
+      ctx.fillRect(10 - rw * 0.5, -18, rw, 3);
+
+      // Underside Shock-Stinger
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-6, 10);
+      ctx.lineTo(2, 22);
+      ctx.lineTo(8, 10);
+      ctx.fill();
+
+      // Glowing Red Mono-Eye Lens
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(15, -1, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (en.aimTimer > 0) {
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(18, 0);
+        ctx.lineTo(280, 22);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    } else if (en.type === 'striker') {
+      // WEAK ENEMY FORM 1: STREET STRIKER (Hunched Reverse-Jointed Droid + Dual Shock-Claws)
+      const stride = Math.sin(en.walkCycle) * 9;
+      ctx.fillStyle = flash ? '#ffffff' : '#18181b';
+      ctx.fillRect(-10 - stride * 0.5, -32, 8, 32);
+      ctx.fillRect(2 + stride * 0.5, -32, 8, 32);
+
+      // Hunched forward torso
+      ctx.fillStyle = flash ? '#ffffff' : '#27272a';
+      ctx.beginPath();
+      ctx.moveTo(-14, -62);
+      ctx.lineTo(16, -56);
+      ctx.lineTo(10, -30);
+      ctx.lineTo(-12, -30);
+      ctx.closePath();
+      ctx.fill();
+
+      // Forward-jutting head & crimson optic visor
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(2, -74, 20, 15);
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(11, -69, 11, 4);
+
+      // Extended Sparking Shock-Claws
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(14, -44);
+      ctx.lineTo(34, -40);
+      ctx.lineTo(14, -36);
+      ctx.fill();
+    } else if (en.type === 'enforcer') {
+      // MEDIUM ENEMY: CYBER ENFORCER (12 DMG)
+      const stride = Math.sin(en.walkCycle) * 7;
+      ctx.fillStyle = flash ? '#ffffff' : '#0f172a';
+      ctx.fillRect(-13 - stride * 0.4, -36, 11, 36);
+      ctx.fillRect(3 + stride * 0.4, -36, 11, 36);
+
+      ctx.fillStyle = flash ? '#ffffff' : '#334155';
+      ctx.fillRect(-18, -74, 36, 40);
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(-6, -64, 12, 12);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-12, -94, 24, 18);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(2, -88, 10, 4);
+
+      if (en.shielded) {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(14, -76, 12, 58);
+        ctx.strokeRect(14, -76, 12, 58);
+      }
+    } else if (en.type === 'boss') {
+      // STAGE BOSSES & STAGE 05 OMEGA-NEMESIS (15 DMG)
+      const scale = en.isOmega ? 1.38 : 1.24;
+      ctx.scale(scale, scale);
+
+      const stride = Math.sin(en.walkCycle) * 8;
+      ctx.fillStyle = flash ? '#ffffff' : '#0f172a';
+      ctx.fillRect(-15 - stride * 0.4, -40, 12, 40);
+      ctx.fillRect(4 + stride * 0.4, -40, 12, 40);
+
+      // Heavy Boss Armor
+      ctx.fillStyle = flash ? '#ffffff' : '#1e293b';
+      ctx.fillRect(-22, -84, 44, 46);
+      ctx.fillStyle = en.color;
+      ctx.fillRect(-26, -86, 14, 16);
+      ctx.fillRect(12, -86, 14, 16);
+      ctx.fillRect(-8, -72, 16, 16);
+
+      // Crowned Helmet
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(-14, -106, 28, 20);
+      ctx.fillStyle = en.accent;
+      ctx.fillRect(2, -99, 13, 5);
+
+      // Boss Energy Greatsword
+      ctx.fillStyle = en.color;
+      ctx.fillRect(18, -62, 68, 9);
+    }
+
+    ctx.restore();
+
+    if (en.type === 'lurker') {
+      /* aviso 'DASH ONLY' removido; contagem aparece no overlay */
+    } else if (!en.fallingAbyss && en.type !== 'boss' && en.hp < en.maxHp) {
+      const bw = 44;
+      const topY = bodyY - (en.type === 'drone' ? 28 : 102);
+      ctx.fillStyle = '#0e1116';
+      ctx.fillRect(sx - bw / 2, topY, bw, 5);
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(sx - bw / 2, topY, bw * Math.max(0, en.hp / en.maxHp), 5);
+    }
+  }
+
+  // ==========================================================================
+  // 2.0s SPLASH GRENADE [Q] RENDERER
+  // ==========================================================================
+  drawGrenadeGroundIndicators(ctx) {
+    for (const g of this.grenades) {
+      const sx = g.x - this.cameraX;
+      const progress = 1 - g.fuseFrames / 60;
+
+      ctx.save();
+      // Expanding splash radius warning ring on the ground
+      ctx.strokeStyle = g.fuseFrames < 18 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(245, 158, 11, 0.65)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.ellipse(sx, g.y, g.splashRadius, g.splashRadius * 0.42, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Inner filling danger circle
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+      ctx.beginPath();
+      ctx.ellipse(sx, g.y, g.splashRadius * progress, g.splashRadius * 0.42 * progress, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  drawGrenade(ctx, g) {
+    const sx = g.x - this.cameraX;
+    const sy = g.y - g.z;
+    const secStr = `${Math.max(0, g.fuseFrames / 60).toFixed(1)}s`;
+
+    // Grenade Canister
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(sx, sy - 6, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Live 2.0s Countdown Pill above grenade
+    ctx.fillStyle = '#0e1116';
+    ctx.fillRect(sx - 22, sy - 32, 44, 16);
+    ctx.strokeStyle = g.fuseFrames < 18 ? '#ef4444' : '#f59e0b';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sx - 22, sy - 32, 44, 16);
+
+    ctx.fillStyle = g.fuseFrames < 18 ? '#fca5a5' : '#fde047';
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(secStr, sx, sy - 20);
+  }
+
+  drawProp(ctx, prop) {
+    const sx = prop.x - this.cameraX;
+    if (sx < -80 || sx > this.W + 80) return;
+
+    const shake = prop.hurtTimer > 0 ? (Math.random() - 0.5) * 6 : 0;
+    ctx.save();
+    ctx.translate(sx + shake, prop.y);
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 26, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (prop.type === 'crate') {
+      ctx.fillStyle = '#141a22';
+      ctx.fillRect(-22, -44, 44, 44);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-22, -44, 44, 44);
+      ctx.beginPath();
+      ctx.moveTo(-22, -44); ctx.lineTo(22, 0);
+      ctx.moveTo(22, -44); ctx.lineTo(-22, 0);
+      ctx.stroke();
+    } else if (prop.type === 'locker') {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-18, -54, 36, 54);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-18, -54, 36, 54);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-10, -44, 20, 4);
+    } else {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-17, -46, 34, 46);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(-17, -34, 34, 5);
+      ctx.fillRect(-17, -16, 34, 5);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-17, -46, 34, 46);
+    }
+    ctx.restore();
+  }
+
+  drawPickup(ctx, pk) {
+    const sx = pk.x - this.cameraX;
+    const hover = Math.sin(pk.bob) * 5;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(sx, pk.y, 14, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(sx, pk.y - 18 + hover);
+    ctx.fillStyle = '#4ade80';
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-8, -8, 16, 16);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.restore();
+  }
+
+  drawProjectile(ctx, pr) {
+    const sx = pr.x - this.cameraX;
+    const sy = pr.y - pr.z;
+
+    ctx.save();
+    ctx.translate(sx, sy);
+    if (pr.owner === 'player') {
+      ctx.scale(Math.sign(pr.vx), 1);
+      ctx.strokeStyle = pr.color;
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.arc(-18, 0, 44, -Math.PI * 0.42, Math.PI * 0.42);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = pr.color;
+      ctx.beginPath();
+      ctx.arc(0, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  drawSlashTrails(ctx) {
+    for (const tr of this.slashTrails) {
+      const sx = tr.x - this.cameraX;
+      const sy = tr.y - tr.z;
+      const alpha = tr.life / tr.maxLife;
+
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.scale(tr.facing, 1);
+      ctx.globalAlpha = alpha;
+
+      ctx.strokeStyle = tr.bladeColor;
+      ctx.lineWidth = tr.step === 3 ? 17 : 12;
+
+      if (tr.weaponId === 'twin') {
+        // Intersecting X-Slash Ribbons for Spectre Twin Blades!
+        ctx.beginPath();
+        ctx.moveTo(-25, -38);
+        ctx.lineTo(75, 34);
+        ctx.moveTo(-25, 34);
+        ctx.lineTo(75, -38);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        if (tr.step === 3) {
+          ctx.ellipse(0, 8, tr.reach, 36, 0, 0, Math.PI * 2);
+        } else if (tr.step === 2) {
+          ctx.arc(-10, 10, tr.reach * 0.85, -Math.PI * 0.48, Math.PI * 0.25);
+        } else {
+          ctx.arc(-12, 0, tr.reach * 0.82, -Math.PI * 0.35, Math.PI * 0.35);
+        }
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  drawParticles(ctx) {
+    for (const pt of this.particles) {
+      const sx = pt.x - this.cameraX;
+      const sy = pt.y - pt.z;
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(sx, sy, pt.size, pt.size);
+    }
+  }
+
+  drawWeatherOverlay(ctx) {
+    const stage = this.getActiveStageConfig();
+    ctx.save();
+    for (const wp of this.weatherParticles) {
+      if (stage.id === 'cool') {
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.28)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(wp.x, wp.y);
+        ctx.lineTo(wp.x - 4, wp.y + wp.len);
+        ctx.stroke();
+      } else if (stage.id === 'hot') {
+        ctx.fillStyle = 'rgba(251, 146, 60, 0.5)';
+        ctx.fillRect(wp.x, wp.y, wp.size, wp.size);
+      } else if (stage.id === 'snow') {
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.65)';
+        ctx.fillRect(wp.x, wp.y, wp.size + 1, wp.size + 1);
+      }
+    }
+    ctx.restore();
+  }
+
+  drawFloatingTexts(ctx) {
+    ctx.save();
+    ctx.font = 'bold 13px Arial, Helvetica, sans-serif';
+    ctx.textAlign = 'center';
+    for (const ft of this.floatingTexts) {
+      const sx = ft.x - this.cameraX;
+      ctx.fillStyle = '#0e1116';
+      ctx.fillText(ft.text, sx + 1.5, ft.y + 1.5);
+      ctx.fillStyle = ft.color;
+      ctx.fillText(ft.text, sx, ft.y);
+    }
+    ctx.restore();
+  }
+
+  // ==========================================================================
+  // CLEAN MATTE-DARK TACTICAL HUD (50 HP LIFE LINE, GRENADES, BOSS HP BAR)
+  // ==========================================================================
+  drawTacticalHUD(ctx) {
+    const p = this.player;
+    const stage = this.getActiveStageConfig();
+    const suit = this.getActiveSuit();
+
+    ctx.save();
+
+    // 1. Top-Left Unit Card: Portrait + 10-Segment 50 HP Life Line + Energy + Grenades
+    ctx.fillStyle = 'rgba(20, 26, 34, 0.92)';
+    ctx.strokeStyle = '#2b3544';
+    ctx.lineWidth = 1;
+    ctx.fillRect(16, 16, 344, 96);
+    ctx.strokeRect(16, 16, 344, 96);
+
+    // Unit Avatar Box
+    ctx.fillStyle = '#0e1116';
+    ctx.fillRect(26, 26, 66, 76);
+    ctx.strokeStyle = suit.trim;
+    ctx.strokeRect(26, 26, 66, 76);
+    ctx.fillStyle = suit.primary;
+    ctx.fillRect(43, 38, 32, 34);
+    ctx.fillStyle = suit.scarfMain;
+    ctx.fillRect(40, 70, 38, 12);
+    ctx.fillStyle = suit.visor;
+    ctx.fillRect(50, 48, 22, 7);
+
+    // 50 HP Segmented Life Line Label & Value
+    ctx.fillStyle = '#f1f5f9';
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`LIFE LINE: ${p.hp} / ${p.maxHp} HP`, 104, 38);
+
+    const barX = 104, barY = 44, barW = 240, barH = 16;
+    ctx.fillStyle = '#0e1116';
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.strokeStyle = '#334155';
+    ctx.strokeRect(barX, barY, barW, barH);
+
+    // 10 Segments (Each segment = 5 HP)
+    const segW = (barW - 2) / 10;
+    const activeSegs = Math.ceil(p.hp / 5);
+    for (let s = 0; s < 10; s++) {
+      if (s < activeSegs) {
+        ctx.fillStyle = p.hp <= 15 ? '#ef4444' : (p.hp <= 30 ? '#f59e0b' : '#22c55e');
+        ctx.fillRect(barX + 2 + s * segW, barY + 2, segW - 2, barH - 4);
+      }
+    }
+
+    // Energy Bar
+    const enY = 67, enH = 10;
+    ctx.fillStyle = '#0e1116';
+    ctx.fillRect(barX, enY, barW, enH);
+    ctx.strokeStyle = '#334155';
+    ctx.strokeRect(barX, enY, barW, enH);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(barX + 1, enY + 1, (barW - 2) * (p.energy / p.maxEnergy), enH - 2);
+
+    // Grenades [Q] & Dash [E] Status Row
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText(`GRENADES [Q]: ${p.grenades}/${p.maxGrenades}`, 104, 96);
+
+    ctx.fillStyle = p.energy >= 20 ? '#38bdf8' : '#64748b';
+    ctx.fillText(`DASH [E]: ${p.energy >= 20 ? 'READY' : 'LOW EN'}`, 235, 96);
+
+    // 2. Top-Center Sector Tag & Score
+    ctx.fillStyle = 'rgba(20, 26, 34, 0.92)';
+    ctx.strokeStyle = '#2b3544';
+    ctx.fillRect(this.W * 0.5 - 175, 16, 350, 44);
+    ctx.strokeRect(this.W * 0.5 - 175, 16, 350, 44);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = stage.accent;
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.fillText(`STAGE 0${stage.number} // ${stage.name}`, this.W * 0.5, 34);
+
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+    ctx.fillText(`SCORE: ${this.score.toLocaleString()}   |   WEAPON: ${this.getActiveWeapon().name}`, this.W * 0.5, 51);
+
+    // 3. Dedicated Top-Center Boss Health Bar when Boss is Active
+    const activeBoss = this.enemies.find((e) => e.type === 'boss');
+    if (activeBoss) {
+      const bx = this.W * 0.5 - 260;
+      const by = 72;
+      const bw = 520;
+      ctx.fillStyle = 'rgba(20, 26, 34, 0.95)';
+      ctx.strokeStyle = activeBoss.color;
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(bx, by, bw, 42);
+      ctx.strokeRect(bx, by, bw, 42);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px Arial, Helvetica, sans-serif';
+      ctx.fillText(`${activeBoss.name} — ${activeBoss.title}`, bx + 12, by + 17);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = activeBoss.color;
+      ctx.fillText(`${Math.max(0, activeBoss.hp)} / ${activeBoss.maxHp} HP`, bx + bw - 12, by + 17);
+
+      ctx.fillStyle = '#0e1116';
+      ctx.fillRect(bx + 12, by + 24, bw - 24, 10);
+      ctx.fillStyle = activeBoss.color;
+      ctx.fillRect(bx + 12, by + 24, (bw - 24) * Math.max(0, activeBoss.hp / activeBoss.maxHp), 10);
+    }
+
+    // 4. Combo Counter (Mid-Left)
+    if (this.combo > 0) {
+      ctx.save();
+      ctx.translate(24, 152);
+      ctx.scale(this.comboScale, this.comboScale);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 26px Arial, Helvetica, sans-serif';
+      ctx.fillText(`${this.combo} HITS`, 0, 0);
+      ctx.restore();
+    }
+
+    // 5. Advance Prompt ("ADVANCE ►") when wave is clear
+    if (!this.cameraLocked && this.enemies.length === 0 && this.appState === 'PLAYING' && Math.floor(performance.now() / 380) % 2 === 0) {
+      ctx.fillStyle = 'rgba(20, 26, 34, 0.9)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(this.W - 165, 76, 145, 34);
+      ctx.strokeRect(this.W - 165, 76, 145, 34);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 14px Arial, Helvetica, sans-serif';
+      ctx.fillText('ADVANCE ►', this.W - 92, 98);
+    }
+
+    // 6. Stage Intro Banner
+    if (this.stageBannerTimer > 0) {
+      const alpha = Math.min(1, this.stageBannerTimer / 25);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(20, 26, 34, 0.94)';
+      ctx.strokeStyle = stage.accent;
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(this.W * 0.5 - 260, 145, 520, 68);
+      ctx.strokeRect(this.W * 0.5 - 260, 145, 520, 68);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = stage.accent;
+      ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+      ctx.fillText(stage.tag, this.W * 0.5, 169);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px Arial, Helvetica, sans-serif';
+      ctx.fillText(stage.name, this.W * 0.5, 198);
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
+  }
+
+  loop(now) {
+    now = now || performance.now();
+    const last = this._last || now; this._last = now;
+    this._acc = Math.min((this._acc || 0) + (now - last), 100);
+    const STEP = 1000 / 60;
+    while (this._acc >= STEP) { this.update(); this._acc -= STEP; }
+    this.render();
+    requestAnimationFrame(this.loop);
+  }
+}
+
+
+/* ===== PATCH: controles editáveis, gráficos, hangar ===== */
+const DEFAULT_BINDS={left:['ArrowLeft','KeyA'],right:['ArrowRight','KeyD'],up:['ArrowUp','KeyW'],down:['ArrowDown','KeyS'],jump:['Space',''],slash:['KeyJ','KeyZ'],dash:['KeyE',''],grenade:['KeyQ',''],wave:['KeyL','KeyX'],help:['KeyH',''],mute:['KeyM','']};
+const BIND_LABELS={left:'Mover esquerda',right:'Mover direita',up:'Mover para cima (profundidade)',down:'Mover para baixo (profundidade)',jump:'Pular',slash:'Golpe de lâmina',dash:'Cyber-Dash',grenade:'Granada',wave:'Onda de plasma',help:'Ajuda',mute:'Áudio on/off'};
+const keyName=c=>!c?'—':c.replace('Key','').replace('Arrow','Seta ').replace('Digit','').replace('Space','Espaço');
+(function(){
+  const P=CyberSlashGame.prototype;
+  P.loadBinds=function(){let b=JSON.parse(JSON.stringify(DEFAULT_BINDS));try{const o=JSON.parse(localStorage.getItem('cs_binds')||'null');if(o)for(const k in b)if(o[k])b[k]=o[k];}catch(e){}this.binds=b;};
+  P.saveBinds=function(){try{localStorage.setItem('cs_binds',JSON.stringify(this.binds));}catch(e){}this.refreshBindLabels();};
+  P.act=function(a){if(!this.binds)this.loadBinds();return this.binds[a].some(c=>c&&this.keys[c]);};
+  P.isBound=function(a,c){if(!this.binds)this.loadBinds();return this.binds[a].includes(c);};
+  P.refreshBindLabels=function(){const b=this.binds,n=a=>keyName(b[a][0]);
+    const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+    set('btnActJump',`PULAR [${n('jump')}]`);set('btnActDash',`DASH [${n('dash')}]`);set('btnActGrenade',`GRANADA [${n('grenade')}]`);set('btnActWave',`ONDA [${n('wave')}]`);set('btnActSlash',`GOLPE [${n('slash')}]`);
+    set('btnHudHelp',`AJUDA [${n('help')}]`);
+    const l=document.getElementById('kbList');if(!l)return;l.innerHTML='';
+    for(const a in BIND_LABELS){const r=document.createElement('div');r.className='kb-row';r.innerHTML=`<span>${BIND_LABELS[a]}</span><span style="display:flex;gap:6px"></span>`;
+      [0,1].forEach(i=>{const bt=document.createElement('button');bt.className='kb-slot';bt.textContent=keyName(b[a][i]);bt.onclick=()=>{bt.classList.add('wait');bt.textContent='aperte...';window.__rebind=true;
+        const h=ev=>{ev.preventDefault();ev.stopPropagation();window.removeEventListener('keydown',h,true);setTimeout(()=>window.__rebind=false,50);
+          if(ev.code!=='Escape'){for(const k in b)b[k]=b[k].map(c=>c===ev.code?'':c);b[a][i]=ev.code;}this.saveBinds();};
+        window.addEventListener('keydown',h,true);};r.lastChild.appendChild(bt);});
+      l.appendChild(r);}
+  };
+  const oldBind=P.bindUIEvents;
+  P.bindUIEvents=function(){this.loadBinds();oldBind.call(this);this.refreshBindLabels();
+    document.getElementById('btnKbReset').onclick=()=>{this.binds=JSON.parse(JSON.stringify(DEFAULT_BINDS));this.saveBinds();};
+    this.canvas.addEventListener('mousedown',()=>{});};
+
+  /* ---- Hangar em abas + cards com arma desenhada e barras ---- */
+  const oldBuild=P.buildHangarCards;
+  P.buildHangarCards=function(){oldBuild.call(this);
+    const grid=document.querySelector('#hangarModal .lg\\:col-span-7');if(!grid||grid.dataset.tabs)return;grid.dataset.tabs=1;
+    const secs=[...grid.children].filter(c=>c.id!=='x'),names=['Armas','Setor','Aprimoramento'];
+    const foot=secs.pop();const tabs=document.createElement('div');tabs.className='hg-tabs';
+    secs.forEach((c,i)=>{c.classList.add('hg-sec');if(!i)c.classList.add('on');const t=document.createElement('button');t.className='hg-tab'+(i?'':' on');t.textContent=names[i];
+      t.onclick=()=>{tabs.querySelectorAll('.hg-tab').forEach((x,j)=>x.classList.toggle('on',j===i));secs.forEach((x,j)=>x.classList.toggle('on',j===i));};tabs.appendChild(t);});
+    grid.insertBefore(tabs,grid.firstChild);
+    document.querySelectorAll('#weaponCardsGrid > button').forEach((card,i)=>{const w=WEAPON_CARDS[i],cv=document.createElement('canvas');cv.width=220;cv.height=60;card.classList.add('wcard');card.prepend(cv);
+      const c=cv.getContext('2d');c.translate(36,30);c.scale(.9,.9);this.drawWeaponGeometry(c,w,false);
+      const bar=(v)=>`<div class="statbar"><i style="width:${v}%"></i></div>`;card.insertAdjacentHTML('beforeend',`<div class="text-[9px] text-slate-400 mt-1">DANO</div>${bar(w.damage/40*100)}<div class="text-[9px] text-slate-400 mt-1">ALCANCE</div>${bar(w.reach/140*100)}`);});
+    document.getElementById('weaponCardsGrid').className='grid grid-cols-2 gap-2';
+  };
+
+  /* ---- Armas redesenhadas: lâmina com gradiente, brilho e cabo detalhado ---- */
+  const oldW=P.drawWeaponGeometry;
+  P.drawWeaponGeometry=function(ctx,w,off){
+    ctx.save();
+    const hilt=(x0,x1)=>{const g=ctx.createLinearGradient(0,-5,0,5);g.addColorStop(0,'#64748b');g.addColorStop(.5,'#1e293b');g.addColorStop(1,'#0f172a');ctx.fillStyle=g;ctx.fillRect(x0,-3,x1-x0,6);ctx.fillStyle='rgba(255,255,255,.25)';for(let x=x0+2;x<x1-1;x+=4)ctx.fillRect(x,-3,1,6);};
+    const blade=(path,len)=>{const g=ctx.createLinearGradient(10,0,len,0);g.addColorStop(0,w.coreColor);g.addColorStop(.35,w.glowColor);g.addColorStop(1,w.bladeColor);
+      ctx.shadowColor=w.glowColor;ctx.shadowBlur=22;ctx.fillStyle=g;path();ctx.fill();ctx.shadowBlur=0;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35;ctx.fillStyle=w.glowColor;path();ctx.fill();};
+    if(w.id==='katana'){hilt(-10,13);ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.ellipse(14,0,3,8,0,0,7);ctx.fill();
+      blade(()=>{ctx.beginPath();ctx.moveTo(15,-3.5);ctx.bezierCurveTo(48,-4,72,-8,94,-13);ctx.lineTo(90,-6);ctx.bezierCurveTo(70,0,44,4,15,3.5);ctx.closePath();},94);
+    }else if(w.id==='claymore'){hilt(-12,15);ctx.fillStyle='#7c2d12';ctx.fillRect(14,-13,6,26);
+      blade(()=>{ctx.beginPath();ctx.moveTo(20,-9);for(let x=26;x<100;x+=9){ctx.lineTo(x,-10);ctx.lineTo(x+4,-13);}ctx.lineTo(112,0);for(let x=100;x>26;x-=9){ctx.lineTo(x,13);ctx.lineTo(x-4,10);}ctx.lineTo(20,9);ctx.closePath();},112);
+    }else if(w.id==='twin'){const L=off?48:58;hilt(-8,11);ctx.fillStyle='#e879f9';ctx.fillRect(10,-7,3,14);
+      blade(()=>{ctx.beginPath();ctx.moveTo(12,-5);ctx.lineTo(12+L,-1);ctx.lineTo(12+L+8,0);ctx.lineTo(12+L,2);ctx.lineTo(12,5);ctx.closePath();},L+12);
+    }else{ctx.fillStyle='#475569';ctx.fillRect(-28,-2.5,100,5);ctx.fillStyle='#bae6fd';ctx.fillRect(-30,-4,6,8);
+      blade(()=>{ctx.beginPath();ctx.moveTo(66,-3);ctx.bezierCurveTo(84,-30,110,-16,122,0);ctx.bezierCurveTo(110,16,84,30,66,3);ctx.closePath();},122);}
+    ctx.restore();
+  };
+
+  /* ---- Cenários: camadas extras (neon, névoa, reflexos) ---- */
+  const oldBG=P.drawStageBackground,oldFl=P.drawWalkableFloor;
+  P.drawStageBackground=function(ctx){oldBG.call(this,ctx);const st=this.getActiveStageConfig(),t=performance.now()/1000,W=this.W;
+    const hue={cool:195,hot:22,thin:45,omega:350}[st.id]??200;
+    ctx.save();
+    for(const [sp,h,al] of [[.35,230,.55],[.55,170,.75]]){const o=this.cameraX*sp;
+      for(let i=-1;i<W/150+2;i++){const bx=i*150-(o%150),seed=Math.abs(Math.floor((i+Math.floor(o/150))*53+this.stageIdx*17)),bh=h*.7+(seed%90),bw=104+(seed%40);
+        const g=ctx.createLinearGradient(0,st.yMin-bh,0,st.yMin);g.addColorStop(0,`hsla(${hue+220%360},35%,14%,${al})`);g.addColorStop(1,`hsla(${hue},40%,6%,${al})`);
+        ctx.fillStyle=g;ctx.fillRect(bx,st.yMin-bh,bw,bh);
+        if(seed%3===0){const on=.55+.4*Math.sin(t*3+seed);ctx.shadowColor=`hsl(${hue+(seed%2?150:0)},100%,60%)`;ctx.shadowBlur=14;ctx.fillStyle=`hsla(${hue+(seed%2?150:0)},100%,65%,${on})`;ctx.fillRect(bx+8,st.yMin-bh+22,5,40+seed%30);ctx.shadowBlur=0;}
+        ctx.fillStyle=`hsla(${hue},90%,70%,${.18*al})`;for(let y=st.yMin-bh+14;y<st.yMin-14;y+=14)for(let x=bx+10;x<bx+bw-12;x+=18)if((x*7+y*3+seed)%5>1)ctx.fillRect(x,y,8,4);}}
+    const f=ctx.createLinearGradient(0,st.yMin-160,0,st.yMin+10);f.addColorStop(0,'rgba(0,0,0,0)');f.addColorStop(1,`hsla(${hue},80%,55%,.22)`);ctx.fillStyle=f;ctx.fillRect(0,st.yMin-160,W,170);
+    ctx.restore();};
+  P.drawWalkableFloor=function(ctx){oldFl.call(this,ctx);const st=this.getActiveStageConfig(),W=this.W,H=this.H;
+    const hue={cool:195,hot:22,thin:45,omega:350}[st.id]??200;
+    const g=ctx.createLinearGradient(0,st.yMin,0,H);g.addColorStop(0,`hsla(${hue},90%,55%,.20)`);g.addColorStop(.25,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=g;ctx.fillRect(0,st.yMin,W,H-st.yMin);
+    ctx.save();ctx.globalCompositeOperation='lighter';const o=this.cameraX%260;
+    for(let x=-o;x<W;x+=260){const rg=ctx.createRadialGradient(x+120,st.yMin+40,2,x+120,st.yMin+40,120);rg.addColorStop(0,`hsla(${hue},100%,60%,.22)`);rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x,st.yMin-40,240,160);}
+    ctx.restore();};
+
+  /* ---- Pós-processamento + HUD moderno ---- */
+  const oldR=P.render;
+  P.render=function(){oldR.call(this);const ctx=this.ctx,W=this.W,H=this.H;
+    ctx.save();const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.85);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,10,.5)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=.05;ctx.fillStyle='#000';for(let y=0;y<H;y+=3)ctx.fillRect(0,y,W,1);ctx.restore();};
+  const oldHud=P.drawTacticalHUD;
+  P.drawTacticalHUD=function(ctx){ctx.save();ctx.shadowColor='rgba(34,211,238,.35)';ctx.shadowBlur=10;oldHud.call(this,ctx);ctx.restore();};
+})();
+
+(function(){
+  const P=CyberSlashGame.prototype;
+  const oldUE=P.updateEnemies;
+  P.updateEnemies=function(stage,p,wind){
+    oldUE.call(this,stage,p,wind);
+    for(let i=this.enemies.length-1;i>=0;i--){
+      const en=this.enemies[i];
+      if(en.type!=='lurker'||en.fallingAbyss)continue;
+      const dx=Math.abs(p.x-en.x),dy=Math.abs(p.y-en.y);
+      if(en.fuse<0&&((dx<46&&dy<28&&p.z<40)||(p.dashTimer>0&&dx<56&&dy<38))){en.fuse=120;en.speed=3.7;sfx.sfxGrenadeBeep(false);this.spawnFloatingText(en.x,en.y-60,'ARMADO!','#ef4444');}
+      if(en.fuse>=0){
+        en.fuse--;
+        if(en.fuse%24===0)sfx.sfxGrenadeBeep(en.fuse<48);
+        if(en.fuse<=0){
+          const R=95;
+          sfx.sfxGrenadeBoom();this.triggerShake(10,12);
+          this.spawnBurst(en.x,en.y,12,'#ef4444',30);this.spawnBurst(en.x,en.y,24,'#fef08a',22);
+          this.spawnFloatingText(en.x,en.y-64,'BOOM!','#f97316');
+          if(p.invulnTimer<=0&&Math.abs(p.x-en.x)<R&&Math.abs(p.y-en.y)<R*.6&&p.z<50)this.damagePlayer(12,p.x>=en.x?1:-1);
+          this.enemies.splice(i,1);
+          for(let k=this.enemies.length-1;k>=0;k--){const o=this.enemies[k];if(o.type!=='boss'&&Math.abs(o.x-en.x)<R&&Math.abs(o.y-en.y)<R*.6)this.damageEnemy(o,40,Math.sign(o.x-en.x)||1,true);}
+        }
+      }
+    }
+  };
+  const oldDE=P.damageEnemy;
+  P.damageEnemy=function(en,amt,dir,heavy){
+    if(en.type==='lurker'&&en.fuse<0){en.fuse=120;en.speed=3.7;this.spawnFloatingText(en.x,en.y-60,'ARMADO!','#ef4444');}
+    if(en.type==='boss'&&en.recover>0){amt=Math.round(amt*1.35);this.spawnFloatingText(en.x,en.y-110,'ABERTURA!','#22d3ee');}
+    oldDE.call(this,en,amt,dir,heavy);
+    if(en.type==='boss'){this.hitstopTimer=Math.min(this.hitstopTimer,1);if(en.hurtTimer>3)en.hurtTimer=3;}
+  };
+  const oldDraw=P.drawEnemy;
+  P.drawEnemy=function(ctx,en){
+    oldDraw.call(this,ctx,en);
+    const sx=en.x-this.cameraX;if(sx<-150||sx>this.W+150)return;
+    const t=performance.now()/1000;
+    if(en.type==='lurker'&&en.fuse>=0){
+      const k=en.fuse/120,pulse=.5+.5*Math.sin(t*(10+(1-k)*30));
+      ctx.save();ctx.translate(sx,en.y);ctx.scale(1,.6);
+      ctx.fillStyle=`rgba(239,68,68,${.12+.2*pulse})`;ctx.strokeStyle=`rgba(239,68,68,${.5+.4*pulse})`;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,95,0,7);ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.arc(0,0,95*(1-k),0,7);ctx.stroke();ctx.restore();
+      ctx.save();ctx.textAlign='center';ctx.font='bold 14px Rajdhani,Arial';ctx.fillStyle=pulse>.5?'#fecaca':'#ef4444';ctx.fillText((en.fuse/60).toFixed(1)+'s',sx,en.y-en.z-48);ctx.restore();
+    }
+    if(en.type==='boss'){
+      if(en.windup>0){const a=en.windup/(en.isOmega?14:18);ctx.save();ctx.translate(sx,en.y);ctx.scale(1,.5);ctx.strokeStyle=`rgba(239,68,68,${.4+.5*(1-a)})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,40+90*(1-a),0,7);ctx.stroke();ctx.restore();
+        ctx.save();ctx.textAlign='center';ctx.font='bold 22px Rajdhani,Arial';ctx.fillStyle='#ef4444';ctx.fillText('!',sx,en.y-en.z-150);ctx.restore();}
+      else if(en.recover>0){ctx.save();ctx.textAlign='center';ctx.font='bold 13px Rajdhani,Arial';ctx.fillStyle='#22d3ee';ctx.fillText('ABERTURA',sx,en.y-en.z-150);ctx.restore();}
+    }
+  };
+})();
+
+window.onload = () => {
+  new CyberSlashGame();
+};
+</script>
+</body>
+</html>
